@@ -1,0 +1,44 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    RewriteCond %{HTTP_HOST} ^(www\.)?meteo360\.zeffyr\.com$ [NC]
+    RewriteCond %{HTTPS} !=on [OR]
+    RewriteCond %{HTTP_HOST} ^www\.meteo360\.zeffyr\.com$ [NC]
+    RewriteRule ^(.*)$ https://meteo360.zeffyr.com/$1 [R=301,L,NE]
+
+    RewriteCond %{HTTP_HOST} ^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteRule ^api/?$ /meteo360/www/index.php/api [L,QSA]
+
+    RewriteCond %{HTTP_HOST} ^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteRule ^api/(.*)$ /meteo360/www/index.php/api/$1 [L,QSA]
+
+    RewriteRule ^api/?$ /index.php/api [L,QSA]
+    RewriteRule ^api/(.*)$ /index.php/api/$1 [L,QSA]
+
+    RewriteCond %{HTTP_HOST} ^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
+    RewriteRule ^$ /meteo360/www/dist/index.html [L]
+
+    RewriteRule ^$ /dist/index.html [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{DOCUMENT_ROOT}/meteo360/www/dist/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/meteo360/www/dist/$1 -d
+    RewriteRule ^(.+)$ /meteo360/www/dist/$1 [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{DOCUMENT_ROOT}/dist/$1 -f [OR]
+    RewriteCond %{DOCUMENT_ROOT}/dist/$1 -d
+    RewriteRule ^(.+)$ /dist/$1 [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{DOCUMENT_ROOT}/meteo360/www/dist/index.html -f
+    RewriteRule ^.*$ /meteo360/www/dist/index.html [L]
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{DOCUMENT_ROOT}/dist/index.html -f
+    RewriteRule ^.*$ /dist/index.html [L]
+</IfModule>

@@ -1,0 +1,262 @@
+<main class="app-shell">
+  <header class="topbar">
+    <div class="brand-lockup">
+      <span class="brand-mark" aria-hidden="true">
+        <mat-icon>cloud</mat-icon>
+      </span>
+      <div>
+        <p class="eyebrow">{{ 'app.title' | transloco }}</p>
+        <h1>{{ 'app.dashboard' | transloco }}</h1>
+        <p class="app-subtitle">{{ 'app.subtitle' | transloco }}</p>
+      </div>
+    </div>
+
+    <div class="topbar-actions">
+      <span class="status-pill">
+        <mat-icon>{{ locatingUser() ? 'gps_fixed' : 'radar' }}</mat-icon>
+        {{ (locatingUser() ? 'location.detecting_short' : 'app.live_badge') | transloco }}
+      </span>
+      <button mat-icon-button type="button" [attr.aria-label]="'app.refresh' | transloco"
+        [matTooltip]="'app.refresh' | transloco" [disabled]="loadingForecast() || loadingPlaces() || locatingUser()"
+        (click)="refreshWeather()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+    </div>
+  </header>
+
+  <mat-card class="search-panel" appearance="outlined" [attr.aria-label]="'search.aria_label' | transloco">
+    <div class="search-copy">
+      <p class="eyebrow">{{ 'location.panel_label' | transloco }}</p>
+      <h2>{{ 'location.panel_title' | transloco }}</h2>
+    </div>
+
+    <form class="search-form" (ngSubmit)="searchPlaces()">
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'search.city_label' | transloco }}</mat-label>
+        <input matInput type="search" [formControl]="searchControl" autocomplete="off" />
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+      <button mat-flat-button color="primary" type="submit" [disabled]="loadingPlaces()">
+        <mat-icon>travel_explore</mat-icon>
+        {{ 'search.button' | transloco }}
+      </button>
+      <button mat-stroked-button class="location-button" type="button" [disabled]="locatingUser() || loadingForecast()"
+        [matTooltip]="'location.button_tooltip' | transloco" (click)="detectCurrentLocation()">
+        <mat-icon>my_location</mat-icon>
+        {{ 'location.button' | transloco }}
+      </button>
+    </form>
+
+    @if (locationNotice(); as locationNoticeKey) {
+    <p class="location-notice">
+      <mat-icon>my_location</mat-icon>
+      <span>{{ locationNoticeKey | transloco }}</span>
+    </p>
+    }
+
+    @if (error()) {
+    <p class="error-message">{{ error() }}</p>
+    }
+  </mat-card>
+
+  <section class="content-grid">
+    <mat-card class="current-panel" appearance="outlined" [class.is-night]="current()?.is_day === 0">
+      @if (locatingUser()) {
+      <div class="loading-state">
+        <mat-spinner diameter="36" />
+        <span>{{ 'location.detecting' | transloco }}</span>
+      </div>
+      } @else if (loadingForecast()) {
+      <div class="loading-state">
+        <mat-spinner diameter="36" />
+        <span>{{ 'weather.loading_forecast' | transloco }}</span>
+      </div>
+      } @else if (current(); as currentWeather) {
+      <div class="current-layout">
+        <div class="current-heading">
+          <div>
+            <p class="eyebrow">{{ 'weather.now' | transloco }}</p>
+            <h2>{{ selectedPlace()?.id === -1 ? ('location.current_name' | transloco) : selectedPlace()?.name }}</h2>
+            <p class="place-meta">
+              {{ selectedPlace()?.id === -1 ? ('location.current_area' | transloco) : selectedPlaceMeta() }}
+            </p>
+          </div>
+
+          <div class="weather-icon-frame" aria-hidden="true">
+            <mat-icon class="weather-icon">{{ weatherIcon(currentWeather.weather_code) }}</mat-icon>
+          </div>
+        </div>
+
+        <div class="temperature-block">
+          <div class="temperature-row">
+            <span class="temperature">{{ currentWeather.temperature_2m | number: '1.0-0' }}</span>
+            <span class="temperature-unit">&deg;C</span>
+          </div>
+          <p class="condition">{{ weatherLabel(currentWeather.weather_code) }}</p>
+        </div>
+
+        <mat-chip-set class="weather-chips" [attr.aria-label]="'weather.context_aria' | transloco">
+          <mat-chip>
+            <mat-icon>schedule</mat-icon>
+            {{ currentWeather.time | date: 'HH:mm' }}
+          </mat-chip>
+          @if (forecast()?.timezone) {
+          <mat-chip>
+            <mat-icon>public</mat-icon>
+            {{ forecast()?.timezone }}
+          </mat-chip>
+          }
+          <mat-chip>
+            <mat-icon>{{ currentWeather.is_day === 1 ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            {{ (currentWeather.is_day === 1 ? 'weather.day' : 'weather.night') | transloco }}
+          </mat-chip>
+        </mat-chip-set>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-icon"><mat-icon>device_thermostat</mat-icon></span>
+          <span class="metric-label">{{ 'weather.feels_like' | transloco }}</span>
+          <strong>{{ currentWeather.apparent_temperature | number: '1.0-0' }} &deg;C</strong>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon"><mat-icon>water_drop</mat-icon></span>
+          <span class="metric-label">{{ 'weather.humidity' | transloco }}</span>
+          <strong>{{ currentWeather.relative_humidity_2m }}%</strong>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon"><mat-icon>air</mat-icon></span>
+          <span class="metric-label">{{ 'weather.wind' | transloco }}</span>
+          <strong>{{ currentWeather.wind_speed_10m | number: '1.0-0' }} km/h</strong>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon"><mat-icon>grain</mat-icon></span>
+          <span class="metric-label">{{ 'weather.rain' | transloco }}</span>
+          <strong>{{ currentWeather.precipitation | number: '1.0-1' }} mm</strong>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon"><mat-icon>cloud_queue</mat-icon></span>
+          <span class="metric-label">{{ 'weather.cloud_cover' | transloco }}</span>
+          <strong>{{ currentWeather.cloud_cover }}%</strong>
+        </div>
+        <div class="metric-card">
+          <span class="metric-icon"><mat-icon>explore</mat-icon></span>
+          <span class="metric-label">{{ 'weather.wind_direction' | transloco }}</span>
+          <strong>{{ currentWeather.wind_direction_10m | number: '1.0-0' }}&deg;</strong>
+        </div>
+      </div>
+      } @else {
+      <div class="empty-state">
+        <mat-icon>wb_cloudy</mat-icon>
+        <h2>{{ 'weather.choose_city_title' | transloco }}</h2>
+        <p>{{ 'weather.choose_city_message' | transloco }}</p>
+      </div>
+      }
+    </mat-card>
+
+    <div class="side-stack">
+      <mat-card class="places-panel" appearance="outlined">
+        <div class="panel-heading">
+          <h2>{{ 'places.title' | transloco }}</h2>
+          <span class="panel-count">{{ places().length }}</span>
+          @if (loadingPlaces()) {
+          <mat-spinner diameter="20" />
+          }
+        </div>
+
+        <div class="place-list">
+          @if (locatingUser()) {
+          <div class="panel-empty">
+            <mat-icon>gps_fixed</mat-icon>
+            <span>{{ 'location.detecting' | transloco }}</span>
+          </div>
+          } @else {
+          @for (place of places(); track place.id ?? place.name) {
+          <button type="button" class="place-button" [class.is-active]="selectedPlace()?.id === place.id"
+            [class.is-current-location]="place.id === -1" (click)="selectPlace(place)">
+            <mat-icon>{{ place.id === -1 ? 'my_location' : 'location_on' }}</mat-icon>
+            <span>
+              <strong>{{ place.id === -1 ? ('location.current_name' | transloco) : place.name }}</strong>
+              <small>{{ place.id === -1 ? ('location.current_area' | transloco) : placeMeta(place) }}</small>
+            </span>
+          </button>
+          } @empty {
+          <div class="panel-empty">
+            <mat-icon>location_searching</mat-icon>
+            <span>{{ 'places.empty' | transloco }}</span>
+          </div>
+          }
+          }
+        </div>
+      </mat-card>
+
+      <mat-card class="hourly-panel" appearance="outlined">
+        <div class="panel-heading">
+          <h2>{{ 'hourly.title' | transloco }}</h2>
+        </div>
+
+        <div class="hourly-strip">
+          @for (hour of hourlyPreview(); track hour.time) {
+          <article class="hour-item">
+            <span class="hour-time">{{ hour.time | date: 'HH:mm' }}</span>
+            <mat-icon>{{ weatherIcon(hour.weatherCode) }}</mat-icon>
+            <strong>{{ hour.temperature | number: '1.0-0' }} &deg;C</strong>
+            <div class="hour-detail">
+              <span>{{ 'weather.rain_short' | transloco }}</span>
+              <strong>{{ hour.precipitationProbability }}%</strong>
+            </div>
+            <mat-progress-bar mode="determinate" [value]="hour.precipitationProbability"></mat-progress-bar>
+            <small>{{ hour.windSpeed | number: '1.0-0' }} km/h</small>
+          </article>
+          } @empty {
+          <div class="panel-empty">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ 'hourly.empty' | transloco }}</span>
+          </div>
+          }
+        </div>
+      </mat-card>
+    </div>
+  </section>
+
+  @if (dailyPreview().length > 0) {
+  <section class="daily-section" [attr.aria-label]="'daily.aria_label' | transloco">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">{{ 'daily.eyebrow' | transloco }}</p>
+        <h2>{{ 'daily.title' | transloco }}</h2>
+      </div>
+    </div>
+
+    <div class="daily-grid">
+      @for (day of dailyPreview(); track day.time) {
+      <mat-card class="day-card" appearance="outlined">
+        <div class="day-topline">
+          <div>
+            <p>{{ day.time | date: 'EEE d MMM' }}</p>
+            <h3>{{ weatherLabel(day.weatherCode) }}</h3>
+          </div>
+          <mat-icon>{{ weatherIcon(day.weatherCode) }}</mat-icon>
+        </div>
+
+        <div class="day-temperatures">
+          <span>
+            <strong>{{ day.max | number: '1.0-0' }}&deg;</strong>
+            <small>{{ 'daily.max' | transloco }}</small>
+          </span>
+          <span>
+            <strong>{{ day.min | number: '1.0-0' }}&deg;</strong>
+            <small>{{ 'daily.min' | transloco }}</small>
+          </span>
+        </div>
+
+        <div class="day-values">
+          <small>{{ 'weather.rain' | transloco }} {{ day.precipitation | number: '1.0-1' }} mm</small>
+          <small>{{ 'weather.wind' | transloco }} {{ day.windSpeed | number: '1.0-0' }} km/h</small>
+        </div>
+      </mat-card>
+      }
+    </div>
+  </section>
+  }
+</main>

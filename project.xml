@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://jelix.org/ns/project/1.0">
+    <info id="meteo360@zeffyr.com" name="meteo360" createdate="2026-05-03">
+        <version>0.1.0</version>
+        <label lang="fr_FR">Meteo360</label>
+        <description lang="fr_FR">Application meteo web</description>
+        <homepageURL>https://github.com/zeffyr-000/meteo360</homepageURL>
+    </info>
+</project>

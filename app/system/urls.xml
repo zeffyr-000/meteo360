@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<urls xmlns="http://jelix.org/ns/urls/1.0">
+    <entrypoint name="index" default="true">
+        <url noentrypoint="true" pathinfo="/" module="commun" action="default:index"/>
+        <url noentrypoint="true" pathinfo="/api" module="commun" action="default:index"/>
+        <url noentrypoint="true" pathinfo="/api/places" module="commun" action="default:places"/>
+        <url noentrypoint="true" pathinfo="/api/forecast" module="commun" action="default:forecast"/>
+    </entrypoint>
+</urls>

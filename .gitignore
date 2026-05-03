@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Angular build/cache
+frontend/.angular/
+frontend/dist/
+www/dist/
+
+# Jelix runtime files
+var/cache/*
+var/log/*
+var/sessions/*
+var/temp/*
+var/meteo-cache/*
+!var/cache/.gitkeep
+!var/log/.gitkeep
+!var/sessions/.gitkeep
+!var/temp/.gitkeep
+!var/meteo-cache/.gitkeep
+
+# Local config and secrets
+.env
+.env.*
+!.env.example
+var/config/profiles.ini.php
+secrets/
+*.key
+
+# Logs and temporary files
+*.log
+tmp/
+temp/
+
+# OS and editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
