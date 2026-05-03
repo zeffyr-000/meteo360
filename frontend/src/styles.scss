@@ -1,0 +1,49 @@
+@use '@angular/material' as mat;
+
+@import '@fontsource/roboto/300.css';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+@import 'material-icons/iconfont/material-icons.css';
+
+:root {
+  --meteo-ink: #17383b;
+  --meteo-muted: #607274;
+  --meteo-surface: #f7fbfa;
+  --meteo-teal: #1f7a76;
+  --meteo-sun: #d77a39;
+  --meteo-sky: #def4ff;
+  --meteo-mint: #e8f7f0;
+  --meteo-warm: #fff1dd;
+}
+
+html {
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$orange-palette
+    ),
+    typography: (
+      plain-family: 'Roboto',
+      brand-family: 'Roboto'
+    ),
+    density: (
+      scale: 0
+    )
+  ));
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--meteo-surface);
+  font-family: Roboto, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}

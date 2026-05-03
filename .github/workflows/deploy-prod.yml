@@ -1,0 +1,119 @@
+name: Deploy production
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+concurrency:
+  group: production-sftp
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build and deploy to OVH
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Lint frontend
+        working-directory: frontend
+        run: npm run lint
+
+      - name: Test frontend
+        working-directory: frontend
+        run: npm test -- --watch=false
+
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build:prod
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "7.4"
+          extensions: curl, json, mbstring
+
+      - name: Check PHP syntax
+        run: find . -path './frontend' -prune -o -path './www/dist' -prune -o -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Check OVH SFTP secrets
+        env:
+          OVH_SFTP_HOST: ${{ secrets.OVH_SFTP_HOST }}
+          OVH_SFTP_PORT: ${{ secrets.OVH_SFTP_PORT }}
+          OVH_SFTP_USER: ${{ secrets.OVH_SFTP_USER }}
+          OVH_SFTP_PASSWORD: ${{ secrets.OVH_SFTP_PASSWORD }}
+          OVH_SFTP_REMOTE_DIR: ${{ secrets.OVH_SFTP_REMOTE_DIR }}
+        run: |
+          test -n "$OVH_SFTP_HOST"
+          test -n "$OVH_SFTP_PORT"
+          test -n "$OVH_SFTP_USER"
+          test -n "$OVH_SFTP_PASSWORD"
+          test -n "$OVH_SFTP_REMOTE_DIR"
+
+      - name: Prepare release
+        run: |
+          mkdir -p release
+          rsync -a ./ release/ \
+            --exclude='release/' \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='.vscode/' \
+            --exclude='docs/' \
+            --exclude='frontend/' \
+            --exclude='node_modules/' \
+            --exclude='composer.json' \
+            --exclude='composer.lock' \
+            --exclude='var/cache/*' \
+            --exclude='var/log/*' \
+            --exclude='var/sessions/*' \
+            --exclude='var/temp/*' \
+            --exclude='var/meteo-cache/*' \
+            --exclude='.env' \
+            --exclude='.env.*'
+
+      - name: Install SFTP client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
+
+      - name: Upload release to OVH SFTP
+        env:
+          OVH_SFTP_HOST: ${{ secrets.OVH_SFTP_HOST }}
+          OVH_SFTP_PORT: ${{ secrets.OVH_SFTP_PORT }}
+          OVH_SFTP_USER: ${{ secrets.OVH_SFTP_USER }}
+          OVH_SFTP_PASSWORD: ${{ secrets.OVH_SFTP_PASSWORD }}
+          OVH_SFTP_REMOTE_DIR: ${{ secrets.OVH_SFTP_REMOTE_DIR }}
+        run: |
+          lftp -u "$OVH_SFTP_USER","$OVH_SFTP_PASSWORD" -p "$OVH_SFTP_PORT" "sftp://$OVH_SFTP_HOST" <<EOF
+          set net:max-retries 2
+          set net:timeout 30
+          set sftp:auto-confirm yes
+          mkdir -p "$OVH_SFTP_REMOTE_DIR"
+          mkdir -p "$OVH_SFTP_REMOTE_DIR/var/cache"
+          mkdir -p "$OVH_SFTP_REMOTE_DIR/var/log"
+          mkdir -p "$OVH_SFTP_REMOTE_DIR/var/sessions"
+          mkdir -p "$OVH_SFTP_REMOTE_DIR/var/temp"
+          mkdir -p "$OVH_SFTP_REMOTE_DIR/var/meteo-cache"
+          mkdir -p "$OVH_SFTP_REMOTE_DIR/www/dist"
+          mirror --reverse --delete --verbose \
+            --exclude-glob var/cache/** \
+            --exclude-glob var/log/** \
+            --exclude-glob var/sessions/** \
+            --exclude-glob var/temp/** \
+            --exclude-glob var/meteo-cache/** \
+            release "$OVH_SFTP_REMOTE_DIR"
+          quit
+          EOF

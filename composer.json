@@ -1,0 +1,13 @@
+{
+  "name": "zeffyr-000/meteo360",
+  "description": "Jelix API backend for Meteo360",
+  "type": "project",
+  "require": {
+    "php": ">=7.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "Meteo360\\": "app/classes/"
+    }
+  }
+}

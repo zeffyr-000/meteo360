@@ -1,0 +1,18 @@
+#!/bin/sh
+
+set -eu
+
+PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+repo_root=$(git rev-parse --show-toplevel)
+
+if ! command -v npm >/dev/null 2>&1; then
+  echo "npm introuvable: impossible de valider lint et tests avant push." >&2
+  exit 1
+fi
+
+echo "[pre-push] Meteo360: lint frontend"
+cd "$repo_root/frontend"
+npm run lint
+
+echo "[pre-push] Meteo360: tests frontend"
+npm test -- --watch=false
