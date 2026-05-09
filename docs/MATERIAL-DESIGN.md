@@ -1,54 +1,52 @@
-# Material Design - Meteo360
+# Material Design Guide - Meteo360
 
-Meteo360 utilise Angular Material 21 avec un theme Material Design 3. L'objectif est une interface de dashboard claire, responsive et efficace pour consulter la meteo, pas une landing page marketing.
+Meteo360 uses Angular Material 21 with a Material Design 3 theme. The UI goal is a compact, readable weather dashboard, not a marketing landing page.
 
-## Philosophie UI
+## UI Philosophy
 
-- Prioriser la lisibilite des donnees.
-- Garder les actions principales visibles.
-- Utiliser les composants Material plutot que des controles custom.
-- Limiter les effets decoratifs.
-- Respecter les contraintes mobiles.
+- prioritize weather data readability
+- keep primary actions visible at all times
+- prefer Angular Material components over custom controls
+- use visual atmosphere without sacrificing operational clarity
+- preserve mobile usability and touch-friendly controls
 
-## Theme Global
+## Global Theme
 
-Le theme est configure dans `frontend/src/styles.scss`:
+The theme is configured in `frontend/src/styles.scss`:
 
 ```scss
-@use "@angular/material" as mat;
+@use '@angular/material' as mat;
 
 html {
-  @include mat.theme(
-    (
-      color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$orange-palette,
-      ),
-      typography: (
-        plain-family: "Roboto",
-        brand-family: "Roboto",
-      ),
-      density: (
-        scale: 0,
-      ),
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$orange-palette
+    ),
+    typography: (
+      plain-family: 'Roboto',
+      brand-family: 'Roboto'
+    ),
+    density: (
+      scale: 0
     )
-  );
+  ));
 }
 ```
 
-Fonts et icones:
+Fonts and icons are loaded locally through:
 
 ```scss
-@import "@fontsource/roboto/300.css";
-@import "@fontsource/roboto/400.css";
-@import "@fontsource/roboto/500.css";
-@import "@fontsource/roboto/700.css";
-@import "material-icons/iconfont/material-icons.css";
+@import '@fontsource/roboto/300.css';
+@import '@fontsource/roboto/400.css';
+@import '@fontsource/roboto/500.css';
+@import '@fontsource/roboto/700.css';
+@import 'material-icons/iconfont/material-icons.css';
 ```
 
-## Tokens Projet
+## Project Tokens
 
-Variables globales actuelles:
+Current global variables:
 
 ```scss
 :root {
@@ -63,68 +61,88 @@ Variables globales actuelles:
 }
 ```
 
-Usage:
+Primary uses:
 
-- `--meteo-ink`: texte principal
-- `--meteo-muted`: texte secondaire
-- `--meteo-surface`: fond global
-- `--meteo-teal`: actions, etats actifs, badges
-- `--meteo-sun`: icones et accents meteo
-- `--meteo-sky`: fonds atmospheriques
-- `--meteo-mint`: surfaces secondaires
-- `--meteo-warm`: details de prevision
+- `--meteo-ink`: main text color
+- `--meteo-muted`: secondary text and metadata
+- `--meteo-surface`: global page background
+- `--meteo-teal`: actions, active states, status accents
+- `--meteo-sun`: weather icons and warm accents
+- `--meteo-sky`: light atmospheric surfaces
+- `--meteo-mint`: secondary cool surfaces
+- `--meteo-warm`: warm detail surfaces
 
-## Composants Utilises
+## Angular Material Components In Use
 
-- `MatButtonModule`: actions recherche et refresh
-- `MatCardModule`: panneaux meteo et cartes jour
-- `MatChipsModule`: contexte actuel, heure, fuseau, jour/nuit
-- `MatFormFieldModule`: champ de recherche
-- `MatIconModule`: pictogrammes meteo et actions
-- `MatInputModule`: saisie ville
-- `MatProgressBarModule`: probabilite de pluie horaire
-- `MatProgressSpinnerModule`: etats de chargement
-- `MatTooltipModule`: libelles d'actions iconiques
+The root dashboard currently imports and uses:
 
-## Guidelines De Layout
+- `MatButtonModule`
+- `MatCardModule`
+- `MatChipsModule`
+- `MatFormFieldModule`
+- `MatIconModule`
+- `MatInputModule`
+- `MatProgressBarModule`
+- `MatProgressSpinnerModule`
+- `MatTooltipModule`
 
-### Dashboard
+## Layout Rules
 
-Le layout principal est `app-shell`:
+### Shell
 
-- largeur maximum: `1180px`
-- padding desktop: `24px`
-- padding mobile: `16px`
-- grille principale responsive
+The main `app-shell` combines a soft atmospheric gradient with subtle overlays. The implementation uses:
 
-### Cartes
+- `width: min(1180px, 100%)` for the main content containers
+- desktop shell padding of `28px 24px 38px`
+- mobile shell padding reduced to `20px 16px 28px`
+- layered gradients and textures without flattening the dashboard into a plain surface
 
-Les cartes Meteo360 utilisent un rayon modere:
+### Cards And Panels
+
+The dashboard uses a consistent 8px radius across key surfaces:
 
 ```scss
 border-radius: 8px;
 ```
 
-Ce choix garde une interface operationnelle et sobre.
+This applies to:
 
-### Donnees Meteo
+- the brand mark
+- the search panel
+- the current weather panel
+- places and hourly panels
+- metric cards
+- daily forecast cards
+- place buttons and status pills
 
-Les metriques sont groupees visuellement:
+### Current Weather Panel
 
-- ressenti
-- humidite
-- vent
-- pluie
-- couverture nuageuse
-- direction du vent
+The current weather panel uses:
 
-Chaque bloc doit garder une hauteur stable pour eviter les sauts de layout.
+- a day theme by default
+- a dedicated `.is-night` variant when `current.is_day === 0`
+- a large weather icon frame
+- Material chips for time, timezone, and day or night state
+- six metric cards for apparent temperature, humidity, wind, rain, cloud cover, and wind direction
 
-Le panneau actuel utilise une variante jour/nuit et des chips Material pour donner du contexte sans surcharger l'ecran.
+### Search And Discovery
 
-## Responsive
+The search area is built with:
 
-Breakpoints actuels:
+- `mat-form-field` in `outline` appearance
+- a flat primary action button for search
+- a secondary stroked button for current location detection
+- translated tooltip and ARIA labels for icon-only actions
+
+### Forecast Views
+
+- the places panel uses selectable button rows with an active state and a dedicated current-location variant
+- the hourly panel uses compact cards with `mat-progress-bar` for precipitation probability
+- the daily section uses uniform day cards with paired max and min temperature blocks
+
+## Responsive Rules
+
+Current breakpoints in `app.scss`:
 
 ```scss
 @media (max-width: 1050px) { ... }
@@ -133,43 +151,34 @@ Breakpoints actuels:
 @media (max-width: 430px) { ... }
 ```
 
-Regles:
+Behavior by breakpoint:
 
-- passer la grille principale en une colonne sous 1050px
-- empiler la recherche sous 760px
-- empiler la topbar et les cartes quotidiennes sous 640px
-- passer les metriques et heures en une colonne sous 430px
-- reduire les cartes et typographies sur mobile
-- eviter le texte qui deborde dans les boutons
-- conserver les boutons tactiles avec une hauteur confortable
+- under `1050px`, the main content grid collapses to a single column
+- under `760px`, shell padding tightens and metrics move to two columns
+- under `640px`, the top bar stacks vertically and the search form becomes one column
+- under `430px`, metric cards and hourly cards collapse to a single column
 
-## Accessibilite
+Keep text from overflowing in buttons, cards, and metric values.
 
-- Utiliser les composants Material pour profiter de leur support ARIA.
-- Ajouter `aria-label` ou tooltip pour les boutons icones.
-- Garder le contraste suffisant entre texte et fond.
-- Ne pas utiliser uniquement la couleur pour indiquer l'etat actif.
-- Conserver les focus natifs des boutons et champs.
+## Accessibility Expectations
 
-## Icones Meteo
+- use Material components for built-in ARIA and keyboard support where possible
+- keep `aria-label` and tooltips on icon-only actions
+- preserve sufficient contrast between text and background layers
+- do not rely on color alone to represent the active state
+- keep focusable controls keyboard-accessible and visually distinct
 
-Mapping actuel dans `App.weatherIcon()`:
+## Weather Icon Mapping
 
-| Codes WMO     | Icone Material |
-| ------------- | -------------- |
-| `0`           | `wb_sunny`     |
-| `1`, `2`, `3` | `filter_drama` |
-| pluie         | `grain`        |
-| neige         | `ac_unit`      |
-| orage         | `flash_on`     |
-| fallback      | `cloud`        |
+The `App.weatherIcon()` method maps WMO groups to Material icons.
 
-Si le mapping evolue, garder les libelles dans Transloco et la logique dans TypeScript, pas dans le template.
+Current groups:
 
-## A Eviter
-
-- Ajouter une landing page avant le dashboard.
-- Ajouter des images ou decorations qui ralentissent la consultation meteo.
-- Introduire une palette trop monochrome.
-- Mettre des textes explicatifs permanents sur l'usage de l'interface.
-- Remplacer Material par des composants custom sans raison forte.
+| WMO codes | Material icon |
+| --------- | ------------- |
+| `0` | `wb_sunny` |
+| `1, 2, 3` | `filter_drama` |
+| `51, 53, 55, 61, 63, 65, 80, 81, 82` | `grain` |
+| `71, 73, 75, 77, 85, 86` | `ac_unit` |
+| `95, 96, 99` | `flash_on` |
+| fallback | `cloud` |

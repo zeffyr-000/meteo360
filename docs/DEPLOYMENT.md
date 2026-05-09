@@ -1,16 +1,16 @@
-# Deploiement - Meteo360
+# Deployment Guide - Meteo360
 
-Meteo360 est deploye sur OVH via GitHub Actions et SFTP/password. Le deploiement ne repose pas sur Docker et ne necessite pas de base de donnees pour le MVP.
+Meteo360 is deployed to OVH through GitHub Actions and SFTP. The deployment model is intentionally simple: no Docker, no database migrations, and no separate frontend or backend deployment pipelines.
 
-## URL De Production
+## Production URL
 
-URL canonique:
+Canonical production URL:
 
 ```text
 https://meteo360.zeffyr.com/
 ```
 
-Les variantes suivantes doivent rediriger en permanent redirect 301 vers l'URL canonique:
+The following variants must redirect permanently to the canonical URL:
 
 ```text
 http://meteo360.zeffyr.com/
@@ -18,53 +18,48 @@ https://www.meteo360.zeffyr.com/
 http://www.meteo360.zeffyr.com/
 ```
 
-Les chemins sont conserves:
+Redirects must preserve the request path and query string.
+
+## OVH Document Root
+
+The full repository is deployed to OVH, but the public document root must point to:
 
 ```text
-http://www.meteo360.zeffyr.com/api/places?q=Paris
--> https://meteo360.zeffyr.com/api/places?q=Paris
+<project-directory>/www/
 ```
 
-## Racine Web OVH
-
-Le depot complet doit etre deploye sur OVH, mais le domaine doit pointer vers le sous-dossier public:
-
-```text
-<dossier-projet>/www/
-```
-
-Le frontend production est servi depuis:
+Production frontend assets are served from:
 
 ```text
 www/dist/
 ```
 
-Le backend Jelix est servi par:
+The backend entry point is:
 
 ```text
 www/index.php
 ```
 
-## GitHub Actions
+## GitHub Actions Workflows
 
-Workflow CI:
+CI workflow:
 
 ```text
 .github/workflows/ci.yml
 ```
 
-Workflow deploiement:
+Production deployment workflow:
 
 ```text
 .github/workflows/deploy-prod.yml
 ```
 
-Declencheurs de production:
+Production deployment triggers:
 
-- push sur `main`
-- declenchement manuel `workflow_dispatch`
+- push to `main`
+- manual `workflow_dispatch`
 
-## Secrets Requis
+## Required Secrets
 
 ```text
 OVH_SFTP_HOST
@@ -74,7 +69,7 @@ OVH_SFTP_PASSWORD
 OVH_SFTP_REMOTE_DIR
 ```
 
-Valeurs connues pour le projet:
+Known non-secret project values:
 
 ```text
 OVH_SFTP_HOST=ssh.cluster103.hosting.ovh.net
@@ -83,28 +78,28 @@ OVH_SFTP_USER=zeffyr-meteo360
 OVH_SFTP_REMOTE_DIR=/
 ```
 
-Le mot de passe SFTP doit etre stocke uniquement dans le secret GitHub `OVH_SFTP_PASSWORD`.
+`OVH_SFTP_REMOTE_DIR=/` is intentional because the SFTP account already points at the Meteo360 project directory.
 
-`OVH_SFTP_REMOTE_DIR=/` est volontaire: le compte SFTP pointe deja vers le dossier projet Meteo360.
+## Deployment Pipeline
 
-## Pipeline De Production
+The production workflow currently performs these steps:
 
-Le workflow effectue:
+1. Check out the repository.
+2. Set up Node.js 22.
+3. Run `npm ci` in `frontend/`.
+4. Run frontend lint.
+5. Run frontend unit tests.
+6. Build the Angular production bundle.
+7. Set up PHP 7.4 in CI.
+8. Run PHP syntax validation outside `frontend/` and `www/dist/`.
+9. Check that the OVH SFTP secrets are present.
+10. Prepare a `release/` directory with excluded development files removed.
+11. Install `lftp`.
+12. Upload the release through SFTP.
 
-1. Checkout du depot.
-2. Installation Node.js 22.
-3. `npm ci` dans `frontend/`.
-4. Lint frontend.
-5. Tests frontend.
-6. Build production Angular.
-7. Installation PHP 7.4 dans l'environnement CI pour verifier la compatibilite backend documentee.
-8. Lint syntaxique PHP.
-9. Preparation du repertoire `release`.
-10. Upload SFTP avec `lftp`.
+## Release Contents
 
-## Contenu De La Release
-
-Inclus:
+Included in the deployed release:
 
 - `app/`
 - `modules/`
@@ -116,7 +111,7 @@ Inclus:
 - `application.init.php`
 - `project.xml`
 
-Exclus:
+Excluded by the workflow:
 
 - `.git/`
 - `.github/`
@@ -124,14 +119,16 @@ Exclus:
 - `docs/`
 - `frontend/`
 - `node_modules/`
-- fichiers runtime dans `var/cache`, `var/log`, `var/sessions`, `var/temp`, `var/meteo-cache`
-- `.env` et `.env.*`
+- `composer.json`
+- `composer.lock`
+- runtime files under `var/cache`, `var/log`, `var/sessions`, `var/temp`, and `var/meteo-cache`
+- `.env` and `.env.*`
 
-## Angular Build Output
+## Angular Build Output Requirement
 
-Angular doit produire `index.html` directement dans `www/dist`, pas dans `www/dist/browser`.
+Angular must emit `index.html` directly into `www/dist`, not into `www/dist/browser`.
 
-Configuration attendue dans `frontend/angular.json`:
+Current `frontend/angular.json` configuration:
 
 ```json
 "outputPath": {
@@ -140,34 +137,34 @@ Configuration attendue dans `frontend/angular.json`:
 }
 ```
 
-Cette configuration est importante parce que `.htaccess` sert `www/dist/index.html`.
+This is required because `www/.htaccess` serves `www/dist/index.html` as the SPA fallback.
 
-## Configuration Apache
+## Apache Responsibilities
 
-`www/.htaccess` doit assurer:
+`www/.htaccess` must continue to handle:
 
-- redirect canonique production
-- routage `/api` vers Jelix
-- fallback Angular vers `dist/index.html`
-- compatibilite locale `http://localhost:8888/meteo360/www/`
-- compatibilite production `https://meteo360.zeffyr.com/`
+- canonical production redirects
+- `/api` routing to Jelix
+- SPA fallback to `dist/index.html`
+- compatibility with the local MAMP path
+- compatibility with the production OVH root
 
-## Verification Apres Deploiement
+## Post-Deployment Checks
 
-Tester l'application:
+Application response:
 
 ```bash
 curl -I 'https://meteo360.zeffyr.com/'
 ```
 
-Tester l'API:
+API response:
 
 ```bash
 curl 'https://meteo360.zeffyr.com/api'
 curl 'https://meteo360.zeffyr.com/api/places?q=Paris&limit=5'
 ```
 
-Tester les redirections:
+Canonical redirects:
 
 ```bash
 curl -I 'http://meteo360.zeffyr.com/'
@@ -175,13 +172,12 @@ curl -I 'https://www.meteo360.zeffyr.com/'
 curl -I 'http://www.meteo360.zeffyr.com/'
 ```
 
-Chaque variante doit renvoyer `301` vers `https://meteo360.zeffyr.com/`.
+Each variant should return `301` to `https://meteo360.zeffyr.com/`.
 
-## Points A Ne Pas Introduire Sans Demande
+## Do Not Introduce Without Explicit Scope Change
 
-- Docker
-- deploiement par cle SSH
-- base de donnees
-- migrations SQL
-- secrets en dur dans le depot
-- exposition directe d'Open-Meteo depuis Angular
+- Docker-based deployment
+- SSH key deployment flow
+- database provisioning or SQL migrations
+- hardcoded secrets in the repository
+- direct Open-Meteo requests from Angular

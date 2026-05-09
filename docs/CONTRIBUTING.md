@@ -1,137 +1,137 @@
 # Contributing Guide - Meteo360
 
-Ce guide fixe les standards de contribution pour Meteo360. Il reprend l'esprit de `suiviseries`: conventions explicites, code testable, documentation maintenue, et respect de l'architecture existante.
+This guide defines the contribution standards for Meteo360. The project aims for the same baseline as the already-validated sibling repositories: explicit conventions, maintainable code, accurate documentation, and respect for the existing Angular and Jelix architecture.
 
-## Workflow Git
+## Workflow
 
-- Travailler sur des branches courtes.
-- Le mainteneur gere les commits et les pushes manuellement si le travail est fait par assistant.
-- Ne pas lancer de `git reset --hard` ou de revert global sans demande explicite.
-- Ne pas melanger une feature avec des refactorings non lies.
+- work on short, focused branches
+- keep features and unrelated refactors separate
+- do not run destructive Git commands without explicit approval
+- the maintainer handles commits and pushes manually when work is produced by an AI assistant
 
-## Regles Projet
+## Project Constraints
 
-- Pas de Docker.
-- Pas de base de donnees pour le MVP.
-- Pas d'authentification tant que ce n'est pas demande.
-- Pas de secret dans le depot.
-- Garder l'API sous `/api`.
-- Garder la production sous `https://meteo360.zeffyr.com/`.
+- no Docker in this project
+- no database for the MVP
+- no authentication unless explicitly requested
+- no secrets in the repository
+- keep the public API under `/api`
+- keep production on `https://meteo360.zeffyr.com/`
 
-## Standards Angular
+## Angular Standards
 
-### Composants
+### Components
 
-- Utiliser les composants standalone Angular 21.
-- Garder `templateUrl` et `styleUrl` separes.
-- Utiliser `ChangeDetectionStrategy.OnPush`.
-- Utiliser `inject()` plutot que l'injection par constructeur.
-- Utiliser `signal()` et `computed()` pour l'etat local.
-- Utiliser `takeUntilDestroyed()` pour les subscriptions.
-- Garder les membres `protected` quand ils ne servent qu'au template.
+- use Angular 21 standalone component patterns
+- keep templates and styles in separate files
+- use `ChangeDetectionStrategy.OnPush`
+- use `inject()` instead of constructor injection
+- use `signal()` and `computed()` for local UI state
+- use `takeUntilDestroyed()` for subscriptions when needed
+- keep members `protected` when they are only consumed by templates
 
 ### Templates
 
-- Utiliser `@if`, `@for`, `@switch`.
-- Ne pas introduire `*ngIf` ou `*ngFor`.
-- Utiliser des pipes Angular pour formater dates et nombres.
-- Ajouter un `track` stable dans les boucles.
-- Eviter les expressions complexes dans les templates.
+- use `@if`, `@for`, and `@switch`
+- do not introduce `*ngIf` or `*ngFor`
+- use Angular pipes for date and number formatting
+- use stable `track` expressions in loops
+- avoid complex inline template expressions
 
 ### Services
 
-- Garder les appels HTTP dans des services Angular.
-- Ne pas appeler directement Open-Meteo depuis les composants.
-- Garder les URLs API relatives.
-- Mapper les reponses API dans les services.
+- keep HTTP calls inside Angular services
+- do not call Open-Meteo directly from components
+- keep API URLs relative
+- map API envelopes to frontend models in the service layer
 
-## Standards Jelix
+## Jelix Standards
 
-### Classes
+### Service Naming
 
-Respecter les conventions de selecteurs Jelix:
+Respect Jelix selector conventions exactly:
 
 ```text
 commun~weather -> modules/commun/classes/weather.class.php -> class weather
 ```
 
-### Controleurs
+### Controllers
 
-- Les controleurs etendent `jController`.
-- Les endpoints API renvoient une reponse `json` Jelix.
-- Les erreurs fournisseur doivent etre capturees et renvoyees sous forme JSON stable.
-- Garder la compatibilite PHP 7.4 locale.
+- controllers extend `jController`
+- API endpoints return Jelix `json` responses
+- provider errors must be caught and returned as stable JSON envelopes
+- backend code must stay compatible with local PHP 7.4 validation
 
-### Configuration
+### Required Runtime Files
 
-Ne pas supprimer:
+Do not remove these runtime paths:
 
 ```text
-plugins/.gitkeep
+plugins/
 var/config/installer.ini.php
 var/config/localconfig.ini.php
 var/config/liveconfig.ini.php
 var/config/localurls.xml
 ```
 
-Ces fichiers/dossiers sont necessaires au fonctionnement local et OVH.
+They are required for the local and OVH execution model.
 
-## Internationalisation
+## Internationalization
 
-Tout texte visible cote Angular doit passer par Transloco:
+All user-facing Angular text must go through Transloco:
 
 ```html
 {{ 'weather.loading_forecast' | transloco }}
 ```
 
-Les traductions vivent dans:
+Translations currently live in:
 
 ```text
 frontend/src/app/i18n/fr.ts
 ```
 
-Ne pas ajouter de fichiers JSON de traduction sans demande.
+Do not add JSON translation files unless the project requirements change.
 
-## Material Design
+## UI And Material Design
 
-- Preferer les composants Angular Material.
-- Utiliser les icones Material existantes.
-- Garder une UI dashboard sobre, lisible, dense et responsive.
-- Eviter les decorations inutiles.
-- Ne pas casser les contraintes mobiles.
+- prefer Angular Material components over custom controls
+- use the existing Material icon font
+- keep the dashboard dense, readable, and responsive
+- avoid decorative UI that does not support the weather workflow
+- preserve mobile layout constraints
 
-## Tests Et Validation
+## Validation Before Review
 
-Avant de proposer une PR:
+From `frontend/`:
 
 ```bash
-cd frontend
+npm run lint
 npm test -- --watch=false
 npm run build:prod
 ```
 
-Puis depuis la racine:
+From the repository root:
 
 ```bash
 find application.init.php modules app www -name '*.php' -print0 | xargs -0 -n1 /Applications/MAMP/bin/php/php7.4.33/bin/php -l
 ```
 
-Tester aussi:
+Recommended proxy check:
 
 ```bash
 curl 'http://localhost:4200/api/places?q=Paris&limit=5'
 ```
 
-## Documentation
+## Documentation Maintenance
 
-Mettre a jour la documentation quand une convention change:
+Update documentation whenever a documented convention changes, especially for:
 
-- setup local
-- routes API
-- deploiement OVH
-- proxy Angular
-- structure Jelix
-- i18n
-- tests
+- local setup
+- API routes or payloads
+- OVH deployment
+- Angular proxy behavior
+- Jelix structure or runtime requirements
+- Transloco usage
+- test and validation commands
 
-Ne pas documenter des fonctionnalites qui n'existent pas encore.
+Do not document features that do not exist yet.

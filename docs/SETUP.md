@@ -1,17 +1,17 @@
-# Setup Local - Meteo360
+# Local Setup - Meteo360
 
-Ce guide decrit l'installation locale de Meteo360. Il est volontairement proche du fonctionnement de `suiviseries` pour le frontend et de `suiviseries-api` pour le backend Jelix.
+This guide describes the local development setup for Meteo360. The project intentionally follows the same local shape used by the validated sibling Jelix projects: Angular runs in `frontend/`, Jelix lives at the repository root, and Apache or MAMP serves the `www/` directory.
 
-## Prerequis
+## Prerequisites
 
-- macOS avec MAMP ou Apache local expose sur `http://localhost:8888/`
+- macOS with MAMP or another local Apache/PHP setup exposed through `http://localhost:8888/`
 - Node.js 22
 - npm 10
-- PHP 7.4 via MAMP pour le local
-- Jelix 1.7 installe dans le repertoire voisin `../jelix/lib1.7`
+- PHP 7.4 available locally for Jelix compatibility checks
+- Jelix 1.7 installed in the sibling path `../jelix/lib1.7`
 - Git
 
-Arborescence locale attendue:
+Expected local layout:
 
 ```text
 /Users/sparkman/www/
@@ -22,7 +22,9 @@ Arborescence locale attendue:
 +-- meteo360/
 ```
 
-## Installation Frontend
+## Frontend Setup
+
+Install dependencies and start the Angular dev server from `frontend/`:
 
 ```bash
 cd /Users/sparkman/www/meteo360/frontend
@@ -30,33 +32,29 @@ npm install
 npm start
 ```
 
-L'application Angular demarre sur:
+The dev server runs on:
 
 ```text
 http://localhost:4200/
 ```
 
-Le script `npm start` lance:
+`npm start` uses the Angular proxy configuration so the frontend can keep calling relative `/api` endpoints.
 
-```bash
-ng serve --proxy-config proxy.conf.json
-```
+## Local Backend
 
-## Backend Local
-
-Le backend est servi par Apache/MAMP depuis la racine globale:
+The backend is served through the shared local Apache or MAMP root:
 
 ```text
 http://localhost:8888/
 ```
 
-Comme plusieurs projets partagent ce serveur local, Meteo360 est accessible sous:
+Within that shared server, Meteo360 is reachable at:
 
 ```text
 http://localhost:8888/meteo360/www/
 ```
 
-Endpoints utiles:
+Useful direct checks:
 
 ```bash
 curl 'http://localhost:8888/meteo360/www/api'
@@ -64,9 +62,9 @@ curl 'http://localhost:8888/meteo360/www/api/places?q=Paris&limit=5'
 curl 'http://localhost:8888/meteo360/www/api/forecast?latitude=48.85341&longitude=2.3488'
 ```
 
-## Proxy Angular
+## Angular Proxy
 
-Le frontend appelle toujours `/api` en relatif. En developpement, Angular transmet ces appels a MAMP via `frontend/proxy.conf.json`:
+The frontend must keep calling relative `/api` URLs. In development, `frontend/proxy.conf.json` forwards those requests to the local Jelix application:
 
 ```json
 {
@@ -77,11 +75,11 @@ Le frontend appelle toujours `/api` en relatif. En developpement, Angular transm
 }
 ```
 
-Apres toute modification du proxy, redemarrer `npm start`. Angular ne recharge pas toujours la configuration proxy a chaud.
+If you change the proxy configuration, restart `npm start`. Angular does not reliably hot-reload proxy changes.
 
-## Configuration Jelix Requise
+## Required Jelix Runtime Files
 
-Meteo360 reprend les fichiers runtime attendus par Jelix:
+The following runtime files must remain present for the local and OVH environments:
 
 ```text
 var/config/installer.ini.php
@@ -90,9 +88,9 @@ var/config/liveconfig.ini.php
 var/config/localurls.xml
 ```
 
-Le dossier `plugins/` doit exister car il est declare dans `application.init.php`.
+The `plugins/` directory must also exist because it is declared in `application.init.php`, even when the directory is otherwise empty.
 
-La convention de service Jelix est stricte:
+Jelix service selectors are strict. For the Meteo360 weather service, the required mapping is:
 
 ```text
 jClasses::getService('commun~weather')
@@ -100,7 +98,9 @@ jClasses::getService('commun~weather')
 -> class weather
 ```
 
-## Commandes De Validation
+Do not rename that file or class to a service-style naming scheme.
+
+## Validation Commands
 
 Frontend:
 
@@ -110,49 +110,49 @@ npm run build:prod
 npm test -- --watch=false
 ```
 
-Backend PHP avec MAMP:
+Backend PHP syntax with the local MAMP runtime:
 
 ```bash
 cd /Users/sparkman/www/meteo360
 find application.init.php modules app www -name '*.php' -print0 | xargs -0 -n1 /Applications/MAMP/bin/php/php7.4.33/bin/php -l
 ```
 
-API via Angular:
+API through the Angular proxy:
 
 ```bash
 curl 'http://localhost:4200/api/places?q=Paris&limit=5'
 ```
 
-## Depannage
+## Troubleshooting
 
-### `/api` retourne 404 via `localhost:4200`
+### `/api` returns `404` through `localhost:4200`
 
-Verifier que `npm start` a ete relance apres modification de `proxy.conf.json`.
+Restart `npm start` after any change to `proxy.conf.json`.
 
-Verifier aussi que l'API directe repond:
+Also verify that the direct API is responding:
 
 ```bash
 curl 'http://localhost:8888/meteo360/www/api'
 ```
 
-### `/api` retourne une erreur Jelix `basePath`
+### Jelix reports a `basePath` issue
 
-Verifier `app/system/mainconfig.ini.php`. Le projet doit rester compatible local et OVH; ne pas figer un `basePath` qui casserait l'un des deux environnements sans validation.
+Check `app/system/mainconfig.ini.php` and `www/.htaccess`. Meteo360 must stay compatible with both the local MAMP path and the OVH production root.
 
-### Erreur `Given plugin dir ... plugins does not exists`
+### `Given plugin dir ... plugins does not exists`
 
-Creer le dossier `plugins/`. Il doit rester versionne avec `.gitkeep`.
+Recreate the `plugins/` directory. It is required by Jelix and should stay versioned.
 
-### Erreur `The application is not installed`
+### `The application is not installed`
 
-Verifier que `var/config/installer.ini.php` existe. Ce fichier est necessaire comme dans `suiviseries-api`.
+Verify that `var/config/installer.ini.php` exists. Jelix expects that runtime file to be present.
 
-### Open-Meteo ne repond pas
+### Open-Meteo is not responding
 
-Tester le fournisseur directement:
+Test the upstream provider directly:
 
 ```bash
 curl 'https://geocoding-api.open-meteo.com/v1/search?name=Paris&count=5&language=fr&format=json'
 ```
 
-Si ce test passe mais `/api/places` echoue, chercher cote PHP/Jelix, pas cote reseau.
+If the provider responds but `/api/places` fails, investigate the PHP or Jelix layer rather than the network path.
