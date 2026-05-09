@@ -78,7 +78,7 @@ OVH_SFTP_USER=zeffyr-meteo360
 OVH_SFTP_REMOTE_DIR=www/meteo360
 ```
 
-`OVH_SFTP_REMOTE_DIR` must point to the Meteo360 project directory relative to the SFTP root. Use a project-specific relative path such as `www/meteo360`. Root targets, dot-prefixed path segments, and whitespace are rejected by the workflow.
+`OVH_SFTP_REMOTE_DIR` must point to the Meteo360 project directory visible from the current SFTP session. Use a project-specific relative path such as `www/meteo360` when the account sees a broader root. Use `/` only when the SFTP account is already scoped to the Meteo360 project directory. Dot segments (`.` and `..`), dot-prefixed path segments, and whitespace are rejected by the workflow.
 
 ## Deployment Pipeline
 

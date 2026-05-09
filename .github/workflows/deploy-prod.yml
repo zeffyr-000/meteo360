@@ -67,13 +67,33 @@ jobs:
         env:
           OVH_SFTP_REMOTE_DIR: ${{ secrets.OVH_SFTP_REMOTE_DIR }}
         run: |
-          normalized_remote_dir="$(printf '%s' "$OVH_SFTP_REMOTE_DIR" | tr -s '/' | sed -E 's#^/##; s#/$##')"
+          squeezed_remote_dir="$(printf '%s' "$OVH_SFTP_REMOTE_DIR" | tr -s '/')"
+          use_session_root=false
 
-          if [[ -z "$normalized_remote_dir" \
-            || ! "$normalized_remote_dir" =~ ^[A-Za-z0-9._/-]+$ \
+          case "$squeezed_remote_dir" in
+            "/")
+              normalized_remote_dir="."
+              use_session_root=true
+              ;;
+            "."|"./")
+              echo "OVH_SFTP_REMOTE_DIR values . and ./ are invalid. Use / when the SFTP account is already scoped to the Meteo360 project directory, or use a relative path such as www/meteo360." >&2
+              exit 1
+              ;;
+            *)
+              normalized_remote_dir="$(printf '%s' "$squeezed_remote_dir" | sed -E 's#^/##; s#/$##')"
+              ;;
+          esac
+
+          if [[ -z "$normalized_remote_dir" ]]; then
+            echo "OVH_SFTP_REMOTE_DIR must not be empty. Use a project-specific relative path such as www/meteo360, or use / when the SFTP account is already scoped to the Meteo360 project directory." >&2
+            exit 1
+          fi
+
+          if [[ "$use_session_root" != true && ( \
+            ! "$normalized_remote_dir" =~ ^[A-Za-z0-9._/-]+$ \
             || "$normalized_remote_dir" =~ (^|/)\.\.?(/|$) \
-            || "$normalized_remote_dir" =~ (^|/)\. ]]; then
-            echo "OVH_SFTP_REMOTE_DIR must point to the Meteo360 project directory relative to the SFTP root, for example www/meteo360. Only letters, digits, slash (/), dot (.), underscore (_), and hyphen (-) are allowed. Root targets, dot segments, and dot-prefixed segments are not allowed." >&2
+            || "$normalized_remote_dir" =~ (^|/)\.[^/]+(/|$) ) ]]; then
+            echo "OVH_SFTP_REMOTE_DIR must point to the Meteo360 project directory relative to the SFTP root, for example www/meteo360. Only letters, digits, slash (/), dot (.), underscore (_), and hyphen (-) are allowed. Dot segments and dot-prefixed segments are not allowed. Use / only when the SFTP account is already scoped to the Meteo360 project directory." >&2
             exit 1
           fi
 
