@@ -75,10 +75,10 @@ Known non-secret project values:
 OVH_SFTP_HOST=ssh.cluster103.hosting.ovh.net
 OVH_SFTP_PORT=22
 OVH_SFTP_USER=zeffyr-meteo360
-OVH_SFTP_REMOTE_DIR=/
+OVH_SFTP_REMOTE_DIR=www/meteo360
 ```
 
-`OVH_SFTP_REMOTE_DIR=/` is intentional because the SFTP account already points at the Meteo360 project directory.
+`OVH_SFTP_REMOTE_DIR` must point to the Meteo360 project directory relative to the SFTP root. Use a project-specific relative path such as `www/meteo360`. Root targets, dot-prefixed path segments, and whitespace are rejected by the workflow.
 
 ## Deployment Pipeline
 
@@ -93,13 +93,15 @@ The production workflow currently performs these steps:
 7. Set up PHP 7.4 in CI.
 8. Run PHP syntax validation outside `frontend/` and `www/dist/`.
 9. Check that the OVH SFTP secrets are present.
-10. Prepare a `release/` directory with excluded development files removed.
-11. Install `lftp`.
-12. Upload the release through SFTP.
+10. Validate that the OVH SFTP target is a project directory, not the SFTP root.
+11. Prepare a targeted `release/` directory with only deployable paths.
+12. Install `lftp`.
+13. Run an SFTP preflight to create the project directory if needed, verify the remote target, and confirm write access.
+14. Upload the release through SFTP using scoped sync operations.
 
 ## Release Contents
 
-Included in the deployed release:
+Only these repository paths are copied into the deployed `release/` directory:
 
 - `app/`
 - `modules/`
@@ -111,18 +113,26 @@ Included in the deployed release:
 - `application.init.php`
 - `project.xml`
 
-Excluded by the workflow:
+Other repository paths are omitted unless the workflow provisions them remotely at runtime.
 
-- `.git/`
-- `.github/`
-- `.vscode/`
-- `docs/`
-- `frontend/`
-- `node_modules/`
-- `composer.json`
-- `composer.lock`
-- runtime files under `var/cache`, `var/log`, `var/sessions`, `var/temp`, and `var/meteo-cache`
-- `.env` and `.env.*`
+Not managed by the release artifact:
+
+- runtime directories other than `var/config/`
+- `../jelix/temp/meteo360/` because it is outside the deployed project directory
+
+## Runtime Directories
+
+The workflow provisions only the runtime directories that are currently required inside the deployed project directory:
+
+- `var/cache/`
+- `var/log/`
+- `var/sessions/`
+
+The workflow does not manage:
+
+- `../jelix/temp/meteo360/` because it is outside `OVH_SFTP_REMOTE_DIR`
+- `var/temp/` because the current Jelix temp path is outside the deployed project directory
+- `var/meteo-cache/` because it is not used by the current application code
 
 ## Angular Build Output Requirement
 

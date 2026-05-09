@@ -136,7 +136,7 @@ OVH_SFTP_PASSWORD
 OVH_SFTP_REMOTE_DIR
 ```
 
-For the current OVH SFTP account, `OVH_SFTP_REMOTE_DIR=/` because the account already points at the Meteo360 project directory. The OVH document root must point to the deployed `www/` folder.
+For the current OVH SFTP account, `OVH_SFTP_REMOTE_DIR=www/meteo360`. It must be a project-specific relative path inside the SFTP root, not `/`, `.`, or a dot-prefixed path. The OVH document root must point to the deployed `www/` folder.
 
 See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full deployment guide.
 
