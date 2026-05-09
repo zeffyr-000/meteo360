@@ -78,7 +78,7 @@ OVH_SFTP_USER=zeffyr-meteo360
 OVH_SFTP_REMOTE_DIR=www/meteo360
 ```
 
-`OVH_SFTP_REMOTE_DIR` must point to the Meteo360 project directory visible from the current SFTP session. Use a project-specific relative path such as `www/meteo360` when the account sees a broader root. Use `/` only when the SFTP account is already scoped to the Meteo360 project directory. Dot segments (`.` and `..`), dot-prefixed path segments, and whitespace are rejected by the workflow.
+`OVH_SFTP_REMOTE_DIR` must point to the Meteo360 project directory visible from the current SFTP session. Use a project-specific relative path such as `www/meteo360` when the account sees a broader root. Use `/` only when the SFTP session already opens in the Meteo360 project directory itself, not in a broader OVH hosting home. Dot segments (`.` and `..`), dot-prefixed path segments, and whitespace are rejected by the workflow.
 
 ## Deployment Pipeline
 
@@ -96,8 +96,12 @@ The production workflow currently performs these steps:
 10. Validate that the OVH SFTP target is a project directory, not the SFTP root.
 11. Prepare a targeted `release/` directory with only deployable paths.
 12. Install `lftp`.
-13. Run an SFTP preflight to create the project directory if needed, verify the remote target, and confirm write access.
+13. Run an SFTP preflight to create the project directory if needed, verify the remote target, detect a broader hosting root when `/` is misused, and confirm write access.
 14. Upload the release through SFTP using scoped sync operations.
+
+Optional GitHub Actions variable:
+
+- `OVH_STRICT_REMOTE_DIR_VALIDATION=true` to make the preflight fail when `/` looks like an OVH hosting home instead of the Meteo360 project directory. By default, that heuristic emits a warning and continues because it can also match a legitimate first deployment to an empty project root that still contains OVH's default `www/` directory.
 
 ## Release Contents
 
