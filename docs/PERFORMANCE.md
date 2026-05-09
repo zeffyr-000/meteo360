@@ -1,25 +1,25 @@
-# Performance - Meteo360
+# Performance Guide - Meteo360
 
-Ce document liste les optimisations et garde-fous de performance du MVP Meteo360.
+This document lists the performance guardrails for the Meteo360 MVP.
 
-## Objectifs
+## Goals
 
-- Build Angular production stable.
-- Bundle initial sous les budgets definis.
-- Fonts servies localement.
-- API backend simple et rapide.
-- Pas de dependance front directe a Open-Meteo.
+- stable Angular production builds
+- controlled frontend bundle size
+- local fonts instead of remote font loading
+- a lightweight backend API boundary
+- no direct frontend dependency on Open-Meteo
 
-## Build Angular
+## Production Build
 
-Commande:
+Build command:
 
 ```bash
 cd frontend
 npm run build:prod
 ```
 
-Sortie attendue:
+Expected output:
 
 ```text
 www/dist/index.html
@@ -27,7 +27,7 @@ www/dist/main-*.js
 www/dist/styles-*.css
 ```
 
-Angular 21 doit produire directement dans `www/dist`:
+Angular is configured to build directly into `www/dist`:
 
 ```json
 "outputPath": {
@@ -36,9 +36,9 @@ Angular 21 doit produire directement dans `www/dist`:
 }
 ```
 
-## Budgets
+## Current Budgets
 
-Budgets actuels dans `frontend/angular.json`:
+From `frontend/angular.json`:
 
 ```json
 {
@@ -56,77 +56,62 @@ Budgets actuels dans `frontend/angular.json`:
 }
 ```
 
-Ces budgets tiennent compte de Transloco MessageFormat et Angular Material.
+These limits account for Angular Material and Transloco MessageFormat.
 
-## CommonJS Autorise
+## Allowed CommonJS Dependency
 
-Transloco MessageFormat depend de `@messageformat/core`, qui est declare comme dependance CommonJS autorisee:
+Transloco MessageFormat depends on `@messageformat/core`, which is explicitly allowed:
 
 ```json
 "allowedCommonJsDependencies": ["@messageformat/core"]
 ```
 
-Ne pas retirer cette configuration sans remplacer MessageFormat.
+Do not remove that allowance unless the MessageFormat dependency is replaced.
 
-## Fonts Et Icones
+## Fonts And Icons
 
-Roboto est charge localement via `@fontsource/roboto`:
+Roboto is bundled locally through `@fontsource/roboto` and Material icons through the `material-icons` package. This avoids an external font CDN dependency during runtime.
 
-```scss
-@import "@fontsource/roboto/300.css";
-@import "@fontsource/roboto/400.css";
-@import "@fontsource/roboto/500.css";
-@import "@fontsource/roboto/700.css";
-```
+## Frontend Runtime Patterns
 
-Les icones Material sont chargees via le package `material-icons`:
+The current frontend implementation uses several low-overhead patterns:
 
-```scss
-@import "material-icons/iconfont/material-icons.css";
-```
-
-## Runtime Frontend
-
-Le composant racine utilise:
-
-- Signals pour l'etat local
-- `computed()` pour les previews horaires et quotidiennes
 - `ChangeDetectionStrategy.OnPush`
-- `takeUntilDestroyed()` pour nettoyer les subscriptions
+- local state stored in Signals
+- `computed()` projections for daily and hourly preview data
+- `takeUntilDestroyed()` for subscription cleanup
+- request ID guards to ignore stale place-search and forecast responses
+- `withFetch()` for the Angular `HttpClient` backend
 
-Les calculs de presentation doivent rester derives de l'etat, pas dupliquer les donnees.
+Presentation logic should stay derived from canonical state instead of duplicating large payloads.
 
-## API Backend
+## Backend Guardrails
 
-Le backend impose:
+The backend weather service currently applies:
 
-- timeout HTTP Open-Meteo de 10 secondes
-- timeout de connexion de 5 secondes
-- normalisation des reponses avant retour au frontend
+- a 10-second request timeout to Open-Meteo
+- a 5-second connection timeout
+- server-side response normalization before returning data to Angular
 
-Les appels fournisseur restent server-side pour:
+Keeping provider calls on the backend preserves a stable frontend contract and centralizes upstream error handling.
 
-- garder un contrat API stable cote Angular
-- simplifier les futures politiques de cache
-- centraliser les erreurs fournisseur
+## Routing And Fallback
 
-## Fallback Angular
+`www/.htaccess` serves `www/dist/index.html` for non-API routes so Angular routes remain functional in production without an extra Node or SSR layer.
 
-`www/.htaccess` sert `www/dist/index.html` pour les routes non API. Cela permet de garder les routes Angular fonctionnelles en production.
+## Future Performance Work
 
-## Axes Futurs
+Evaluate only if the MVP grows beyond its current scope:
 
-A evaluer uniquement apres le MVP:
+- short-lived backend cache for place lookups
+- short-lived backend cache for forecasts by coordinates
+- lazy loading if the app grows into multiple routed pages
+- Lighthouse validation after production hardening
+- end-to-end performance checks if critical workflows expand
 
-- cache backend court pour les recherches de villes
-- cache backend court pour les previsions par coordonnees
-- lazy loading si l'application gagne plusieurs pages
-- audit Lighthouse apres mise en production
-- tests E2E Playwright si les workflows deviennent critiques
+## Anti-Patterns
 
-## Anti-patterns
-
-- appeler Open-Meteo depuis Angular directement
-- ajouter des dependances lourdes pour de simples formatages
-- stocker de gros payloads en signals si une projection suffit
-- introduire une PWA ou service worker avant d'avoir une strategie de cache documentee
+- calling Open-Meteo directly from Angular
+- adding heavy dependencies for formatting that Angular already handles well
+- storing large duplicated payloads when a computed projection is enough
+- introducing a service worker before a documented caching strategy exists

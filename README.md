@@ -1,59 +1,58 @@
 # Meteo360
 
-Meteo360 est une application web meteo construite avec un frontend Angular 21 et une API Jelix 1.7. Le MVP ne depend d'aucune base de donnees: l'API backend interroge Open-Meteo, normalise les reponses, puis le frontend consomme des endpoints relatifs sous `/api`.
+Meteo360 is a weather dashboard built with an Angular 21 frontend and a Jelix 1.7 backend API. The MVP intentionally keeps the stack simple: no database, no authentication layer, and no direct frontend calls to Open-Meteo.
 
-Application de production: [https://meteo360.zeffyr.com/](https://meteo360.zeffyr.com/)
+Production URL: [https://meteo360.zeffyr.com/](https://meteo360.zeffyr.com/)
 
-## Stack
+## Tech Stack
 
-- Angular 21, composants standalone, Signals, `inject()`, `ChangeDetectionStrategy.OnPush`
-- Angular Material 21 avec theme Material Design 3
-- Transloco et Transloco MessageFormat, sur le meme modele que `suiviseries`
-- Jelix 1.7 pour l'API PHP classique
-- Open-Meteo pour la geocodification et les previsions
-- GitHub Actions pour CI et deploiement OVH via SFTP
+- Angular 21 standalone components, Signals, `inject()`, `ChangeDetectionStrategy.OnPush`
+- Angular Material 21 with a Material Design 3 theme
+- Transloco and Transloco MessageFormat with inline TypeScript translations
+- Jelix 1.7 for the PHP API layer
+- Open-Meteo for geocoding and forecast data
+- GitHub Actions for CI and OVH deployment through SFTP
 
-## Fonctionnalites MVP
+## MVP Features
 
-- Recherche de villes via Open-Meteo Geocoding
-- Selection d'un lieu et recuperation des previsions meteo
-- Meteo actuelle: temperature, ressenti, humidite, vent, precipitation
-- Apercu horaire des prochaines heures
-- Previsions quotidiennes sur 7 jours
-- Interface responsive Material Design
-- Routes API meme domaine en production sous `/api`
-- Redirection canonique permanente vers `https://meteo360.zeffyr.com/`
+- Place search powered by Open-Meteo geocoding
+- Current weather for the selected location
+- Hourly forecast preview for the next hours
+- Seven-day forecast preview
+- Responsive dashboard layout built with Angular Material
+- Relative `/api` routing in development and production
+- Canonical production redirects to `https://meteo360.zeffyr.com/`
 
-## Architecture
+## Repository Shape
 
-Le depot reprend la forme de `suiviseries-api`: Jelix vit a la racine et le repertoire public est `www/`. Le frontend Angular vit dans `frontend/` et son build de production est genere dans `www/dist`.
+Meteo360 follows the same local/OVH deployment shape used by the validated sibling Jelix projects: the backend lives at the repository root, the Angular app lives in `frontend/`, and the production build is emitted to `www/dist`.
 
 ```text
 meteo360/
-+-- app/                 # Configuration Jelix
-+-- frontend/            # Application Angular 21
-+-- modules/             # Modules Jelix
-|   +-- commun/          # Controleurs API et service meteo
-+-- plugins/             # Plugins Jelix declares, dossier requis meme vide
-+-- var/                 # Config runtime, logs, sessions, cache
-+-- www/                 # Racine web publique
-    +-- index.php        # Point d'entree Jelix
-    +-- .htaccess        # Routage API, fallback Angular, redirects prod
-    +-- dist/            # Build Angular production
++-- app/                 # Jelix configuration
++-- frontend/            # Angular 21 application
++-- modules/             # Jelix modules
+|   +-- commun/          # Public API controller and weather service
++-- plugins/             # Required by Jelix even when empty
++-- var/                 # Runtime config, cache, logs, sessions
++-- www/                 # Public web root
+        +-- index.php        # Jelix entry point
+        +-- .htaccess        # API routing, SPA fallback, canonical redirects
+        +-- dist/            # Angular production build output
 ```
 
-Documentation detaillee: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for the full runtime and deployment model.
 
-## Demarrage Local
+## Quick Start
 
-Pre-requis:
+Prerequisites:
 
 - Node.js 22
 - npm 10
-- MAMP ou Apache/PHP local expose sur `http://localhost:8888/`
-- Jelix installe dans le repertoire voisin `../jelix/lib1.7`
+- MAMP or another local Apache/PHP setup exposed through `http://localhost:8888/`
+- Jelix 1.7 installed in the sibling path `../jelix/lib1.7`
 
-Installation frontend:
+Start the frontend from `frontend/`:
 
 ```bash
 cd frontend
@@ -61,22 +60,34 @@ npm install
 npm start
 ```
 
-L'application Angular est disponible sur `http://localhost:4200/`.
+The Angular dev server runs on `http://localhost:4200/`.
 
-Le proxy Angular suit le meme principe que `suiviseries`: les appels `/api/**` sont transmis a `http://localhost:8888/meteo360/www/`.
+## Local API Proxy
 
-Verification API directe:
+Frontend code must keep calling relative `/api` endpoints. In development, the Angular proxy forwards those requests to the local Jelix app:
+
+```json
+{
+    "/api/**": {
+        "target": "http://localhost:8888/meteo360/www/",
+        "secure": false
+    }
+}
+```
+
+Useful local checks:
 
 ```bash
 curl 'http://localhost:8888/meteo360/www/api'
 curl 'http://localhost:8888/meteo360/www/api/places?q=Paris&limit=5'
+curl 'http://localhost:4200/api/places?q=Paris&limit=5'
 ```
 
-Guide complet: [docs/SETUP.md](docs/SETUP.md)
+See [docs/SETUP.md](docs/SETUP.md) for the complete local setup guide.
 
-## API
+## Public API
 
-Endpoints publics du MVP:
+Current MVP endpoints:
 
 ```text
 GET /api
@@ -84,24 +95,13 @@ GET /api/places?q=Paris&limit=5
 GET /api/forecast?latitude=48.85341&longitude=2.3488
 ```
 
-L'API renvoie toujours du JSON et ajoute les entetes CORS utiles au developpement local.
+The Angular frontend consumes those endpoints through `WeatherService` and does not depend on raw Open-Meteo payloads.
 
-Specification detaillee: [docs/API.md](docs/API.md)
+See [docs/API.md](docs/API.md) for request and response details.
 
-## Internationalisation
+## Quality Checks
 
-Meteo360 utilise Transloco exactement comme `suiviseries`:
-
-- loader inline `TranslocoInlineLoader` dans `frontend/src/app/app.config.ts`
-- traductions TypeScript dans `frontend/src/app/i18n/fr.ts`
-- imports `TranslocoModule` dans les composants standalone
-- helper de test `getTranslocoTestingModule()`
-
-Guide: [docs/I18N.md](docs/I18N.md)
-
-## Qualite
-
-Commandes principales:
+Frontend checks:
 
 ```bash
 cd frontend
@@ -109,24 +109,24 @@ npm run build:prod
 npm test -- --watch=false
 ```
 
-Validation PHP locale avec MAMP:
+Backend PHP syntax validation:
 
 ```bash
 cd /Users/sparkman/www/meteo360
 find application.init.php modules app www -name '*.php' -print0 | xargs -0 -n1 /Applications/MAMP/bin/php/php7.4.33/bin/php -l
 ```
 
-Documentation qualite:
+Related guides:
 
 - [docs/TESTING.md](docs/TESTING.md)
 - [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)
 - [docs/PERFORMANCE.md](docs/PERFORMANCE.md)
 
-## Deploiement
+## Deployment
 
-Le deploiement de production est automatise par `.github/workflows/deploy-prod.yml` sur `main` et via `workflow_dispatch`.
+Production deployment is handled by `.github/workflows/deploy-prod.yml` on `main` and through `workflow_dispatch`.
 
-Secrets GitHub Actions requis:
+Required GitHub Actions secrets:
 
 ```text
 OVH_SFTP_HOST
@@ -136,33 +136,29 @@ OVH_SFTP_PASSWORD
 OVH_SFTP_REMOTE_DIR
 ```
 
-Pour le compte SFTP actuel `zeffyr-meteo360`, le compte pointe directement vers le dossier projet OVH. La valeur attendue est donc:
+For the current OVH SFTP account, `OVH_SFTP_REMOTE_DIR=/` because the account already points at the Meteo360 project directory. The OVH document root must point to the deployed `www/` folder.
 
-```text
-OVH_SFTP_REMOTE_DIR=/
-```
-
-La racine documentaire du domaine OVH doit pointer vers le sous-dossier `www/` du projet deploye.
-
-Guide complet: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the full deployment guide.
 
 ## Documentation
 
-- [docs/SETUP.md](docs/SETUP.md) - Installation locale et troubleshooting
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - Architecture frontend/backend
-- [docs/API.md](docs/API.md) - Specification des endpoints
-- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) - Deploiement OVH et redirects
-- [docs/TESTING.md](docs/TESTING.md) - Tests Angular, API et PHP
-- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - Standards de contribution
-- [docs/MATERIAL-DESIGN.md](docs/MATERIAL-DESIGN.md) - Usage Angular Material
-- [docs/I18N.md](docs/I18N.md) - Transloco et traduction
-- [docs/PERFORMANCE.md](docs/PERFORMANCE.md) - Build, budgets et optimisations
-- [docs/DOCUMENTATION_STATUS.md](docs/DOCUMENTATION_STATUS.md) - Etat de la documentation
-- [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) - Tokens et guidelines UI
+- [AGENTS.md](AGENTS.md) - central AI guide and project-specific agent rules
+- [docs/README.md](docs/README.md) - documentation index and update triggers
+- [docs/SETUP.md](docs/SETUP.md) - local installation and troubleshooting
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) - frontend/backend architecture
+- [docs/API.md](docs/API.md) - public API contract
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) - OVH deployment and redirects
+- [docs/TESTING.md](docs/TESTING.md) - testing and validation workflow
+- [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) - development standards
+- [docs/MATERIAL-DESIGN.md](docs/MATERIAL-DESIGN.md) - Angular Material usage
+- [docs/I18N.md](docs/I18N.md) - Transloco setup and localization rules
+- [docs/PERFORMANCE.md](docs/PERFORMANCE.md) - budgets and performance guardrails
+- [docs/DOCUMENTATION_STATUS.md](docs/DOCUMENTATION_STATUS.md) - documentation standard and maintenance scope
+- [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) - design tokens and UI conventions
 
-## Contraintes Projet
+## Project Constraints
 
-- Pas de Docker.
-- Pas de base de donnees pour le MVP.
-- Pas de commit automatique: les commits sont faits manuellement par le mainteneur.
-- Le backend Jelix doit rester compatible avec la structure locale `http://localhost:8888/meteo360/www/` et la production `https://meteo360.zeffyr.com/`.
+- No Docker in this project.
+- No database for the MVP.
+- No automatic commits; the maintainer handles Git commits manually.
+- The Jelix backend must stay compatible with both `http://localhost:8888/meteo360/www/` and `https://meteo360.zeffyr.com/`.

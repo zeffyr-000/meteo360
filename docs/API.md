@@ -1,16 +1,16 @@
 # API Documentation - Meteo360
 
-L'API Meteo360 est une API JSON publique exposee sous `/api`. Elle est implementee avec Jelix 1.7 dans `modules/commun/controllers/default.classic.php`.
+Meteo360 exposes a public JSON API under `/api`. The API is implemented with Jelix 1.7 in `modules/commun/controllers/default.classic.php` and normalized through the `commun~weather` service.
 
 ## Base URLs
 
-Local direct:
+Direct local access:
 
 ```text
 http://localhost:8888/meteo360/www/api
 ```
 
-Local via Angular:
+Local access through the Angular dev server:
 
 ```text
 http://localhost:4200/api
@@ -22,9 +22,9 @@ Production:
 https://meteo360.zeffyr.com/api
 ```
 
-## Format General
+## Response Shapes
 
-Les endpoints meteo renvoient une enveloppe JSON:
+The weather endpoints return a JSON envelope:
 
 ```json
 {
@@ -33,49 +33,38 @@ Les endpoints meteo renvoient une enveloppe JSON:
 }
 ```
 
-ou:
+or:
 
 ```json
 {
   "success": false,
-  "error": "Message d'erreur"
+  "error": "<human-readable error message>"
 }
 ```
 
-L'endpoint de statut `/api` renvoie une structure plus directe.
+`/api/forecast` uses `forecast` instead of `results` in the success payload.
 
-## Headers
+The status endpoint `/api` returns a direct JSON object rather than the generic success envelope.
 
-L'API ajoute des headers CORS uniquement quand l'en-tete `Origin` appartient a la liste autorisee suivante:
+Current backend error messages are human-readable French strings, for example `Parametres de recherche invalides`, `Coordonnees invalides`, or `Impossible de recuperer la meteo`.
 
-- `http://localhost:4200`
-- `http://127.0.0.1:4200`
-- `https://meteo360.zeffyr.com`
+## CORS Policy
 
-Exemple de reponse pour une origine autorisee:
+The controller adds CORS headers only when the request `Origin` is one of these values:
 
-```http
-Access-Control-Allow-Origin: http://localhost:4200
-Vary: Origin
-Access-Control-Allow-Methods: GET, OPTIONS
-Access-Control-Allow-Headers: Content-Type, Authorization
+```text
+http://127.0.0.1:4200
+http://localhost:4200
+https://meteo360.zeffyr.com
 ```
 
-Si l'origine n'est pas autorisee, l'API ne renvoie pas de header `Access-Control-Allow-Origin`.
+Allowed methods are `GET, OPTIONS` and allowed headers are `Content-Type, Authorization`.
 
-Les headers de securite sont ajoutes dans `www/index.php`.
+## `GET /api`
 
-## GET /api
+Returns the API status payload.
 
-Retourne l'etat minimal de l'API.
-
-### Exemple
-
-```bash
-curl 'http://localhost:8888/meteo360/www/api'
-```
-
-### Reponse 200
+Example response:
 
 ```json
 {
@@ -86,24 +75,29 @@ curl 'http://localhost:8888/meteo360/www/api'
 }
 ```
 
-## GET /api/places
+Notes:
 
-Recherche des lieux via Open-Meteo Geocoding.
+- `database` is explicitly `false` because the MVP has no database layer.
+- `OPTIONS` requests are accepted for preflight handling.
 
-### Parametres
+## `GET /api/places`
 
-| Nom     | Type    | Requis | Description                                        |
-| ------- | ------- | ------ | -------------------------------------------------- |
-| `q`     | string  | oui    | Texte recherche, par exemple `Paris`               |
-| `limit` | integer | non    | Nombre de resultats, borne entre 1 et 10, defaut 5 |
+Searches for places through the Open-Meteo geocoding API.
 
-### Exemple
+### Query Parameters
+
+| Name | Type | Required | Default | Notes |
+| ---- | ---- | -------- | ------- | ----- |
+| `q` | string | No | empty string | Empty input returns an empty result list |
+| `limit` | integer | No | `5` | Controller validates integer input, service clamps the range to `1..10` |
+
+### Example Request
 
 ```bash
-curl 'http://localhost:8888/meteo360/www/api/places?q=Paris&limit=5'
+curl 'https://meteo360.zeffyr.com/api/places?q=Paris&limit=5'
 ```
 
-### Reponse 200
+### Success Response
 
 ```json
 {
@@ -122,133 +116,108 @@ curl 'http://localhost:8888/meteo360/www/api/places?q=Paris&limit=5'
 }
 ```
 
-### Reponse 500
+### Error Behavior
 
-```json
-{
-  "success": false,
-  "error": "Impossible de rechercher les lieux"
-}
-```
+- `400 Bad Request` for invalid parameter types, such as a non-integer `limit`
+- `500 Internal Server Error` when the provider request fails or returns invalid data
 
-## GET /api/forecast
+Implementation notes:
 
-Retourne les previsions pour une latitude et une longitude.
+- The upstream geocoding request currently uses `language=fr`
+- An empty `q` value returns `success: true` with an empty `results` array
 
-### Parametres
+## `GET /api/forecast`
 
-| Nom         | Type   | Requis | Description                 |
-| ----------- | ------ | ------ | --------------------------- |
-| `latitude`  | number | oui    | Latitude entre -90 et 90    |
-| `longitude` | number | oui    | Longitude entre -180 et 180 |
+Returns the current, hourly, and daily forecast for a location.
 
-Alias acceptes pour compatibilite:
+### Query Parameters
 
-- `lat`
-- `lon`
+| Name | Type | Required | Notes |
+| ---- | ---- | -------- | ----- |
+| `latitude` | number | Yes | `lat` is accepted as a fallback alias |
+| `longitude` | number | Yes | `lon` is accepted as a fallback alias |
 
-### Exemple
+### Example Request
 
 ```bash
-curl 'http://localhost:8888/meteo360/www/api/forecast?latitude=48.85341&longitude=2.3488'
+curl 'https://meteo360.zeffyr.com/api/forecast?latitude=48.85341&longitude=2.3488'
 ```
 
-### Reponse 200
+### Success Response
 
 ```json
 {
   "success": true,
   "forecast": {
-    "latitude": 48.86,
-    "longitude": 2.34,
+    "latitude": 48.85341,
+    "longitude": 2.3488,
     "timezone": "Europe/Paris",
     "current": {
-      "time": "2026-05-03T19:15",
-      "temperature_2m": 20,
-      "relative_humidity_2m": 55,
-      "apparent_temperature": 18.7,
+      "time": "2026-05-09T14:30",
+      "temperature_2m": 19.8,
+      "relative_humidity_2m": 58,
+      "apparent_temperature": 18.9,
       "is_day": 1,
       "precipitation": 0,
       "weather_code": 3,
-      "cloud_cover": 99,
-      "wind_speed_10m": 10.3,
-      "wind_direction_10m": 192
+      "cloud_cover": 76,
+      "wind_speed_10m": 11.4,
+      "wind_direction_10m": 205
     },
     "hourly": {
-      "time": [],
-      "temperature_2m": [],
-      "precipitation_probability": [],
-      "weather_code": [],
-      "wind_speed_10m": []
+      "time": ["2026-05-09T14:00", "2026-05-09T15:00"],
+      "temperature_2m": [19.8, 20.2],
+      "precipitation_probability": [5, 10],
+      "weather_code": [3, 61],
+      "wind_speed_10m": [11.4, 13.1]
     },
     "daily": {
-      "time": [],
-      "weather_code": [],
-      "temperature_2m_max": [],
-      "temperature_2m_min": [],
-      "precipitation_sum": [],
-      "wind_speed_10m_max": []
+      "time": ["2026-05-09", "2026-05-10"],
+      "weather_code": [3, 61],
+      "temperature_2m_max": [21.4, 18.7],
+      "temperature_2m_min": [12.1, 10.4],
+      "precipitation_sum": [0, 2.3],
+      "wind_speed_10m_max": [18.2, 24.6]
     },
     "units": {
-      "current": {},
-      "hourly": {},
-      "daily": {}
+      "current": {
+        "temperature_2m": "°C",
+        "relative_humidity_2m": "%",
+        "apparent_temperature": "°C",
+        "precipitation": "mm",
+        "wind_speed_10m": "km/h"
+      },
+      "hourly": {
+        "temperature_2m": "°C",
+        "precipitation_probability": "%",
+        "wind_speed_10m": "km/h"
+      },
+      "daily": {
+        "temperature_2m_max": "°C",
+        "temperature_2m_min": "°C",
+        "precipitation_sum": "mm",
+        "wind_speed_10m_max": "km/h"
+      }
     }
   }
 }
 ```
 
-### Reponse 400
+### Returned Forecast Sections
 
-Parametres manquants:
+- `current`: the current weather object returned by Open-Meteo, or `null` if the provider omits it
+- `hourly`: hourly arrays for temperature, precipitation probability, weather code, and wind speed, or `null` if omitted
+- `daily`: daily arrays for weather code, max and min temperature, precipitation sum, and max wind speed, or `null` if omitted
+- `units`: normalized unit maps for `current`, `hourly`, and `daily`
 
-```json
-{
-  "success": false,
-  "error": "Les parametres latitude et longitude sont requis"
-}
-```
+### Error Behavior
 
-Coordonnees invalides:
+- `400 Bad Request` when latitude or longitude is missing
+- `400 Bad Request` when coordinates are not numeric or outside valid geographic bounds
+- `500 Internal Server Error` when the provider request fails or returns invalid data
 
-```json
-{
-  "success": false,
-  "error": "Coordonnees invalides"
-}
-```
+## Provider Boundary
 
-### Reponse 500
+Meteo360 keeps provider-specific logic on the backend. The frontend calls only `/api/places` and `/api/forecast` through `WeatherService`.
 
-```json
-{
-  "success": false,
-  "error": "Impossible de recuperer la meteo"
-}
-```
-
-## OPTIONS
-
-Les endpoints acceptent `OPTIONS` et renvoient les headers CORS sans traitement metier.
-
-## Frontend Contract
-
-Le frontend consomme l'API dans `frontend/src/app/services/weather.service.ts`.
-
-Regles:
-
-- `searchPlaces()` mappe `PlacesResponse.results` vers `WeatherPlace[]`.
-- `getForecast()` mappe `ForecastResponse.forecast` vers `WeatherForecast`.
-- Les composants ne doivent pas appeler Open-Meteo directement.
-- Les composants ne doivent pas reconstruire les URLs API eux-memes.
-
-## Provider Contract
-
-Le backend appelle Open-Meteo dans `modules/commun/classes/weather.class.php`.
-
-Regles:
-
-- Timeout total: 10 secondes.
-- Timeout connexion: 5 secondes.
-- User-Agent: `meteo360/0.1`.
-- Les erreurs fournisseur sont journalisees par le controleur et renvoyees sous forme d'erreur applicative.
+This keeps the browser-side contract stable even if the provider payload changes later.

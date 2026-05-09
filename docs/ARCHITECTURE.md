@@ -1,43 +1,43 @@
-# Architecture Technique - Meteo360
+# Technical Architecture - Meteo360
 
-Meteo360 combine une application Angular 21 et une API Jelix 1.7 dans un depot unique. Le projet est volontairement simple pour le MVP: aucune base de donnees, aucune authentification persistante, et aucune couche Docker.
+Meteo360 combines an Angular 21 weather dashboard with a Jelix 1.7 API in a single repository. The project is intentionally small for the MVP: no database, no authentication layer, no Docker, and no direct browser-to-provider calls.
 
-## Objectifs D'Architecture
+## Architecture Goals
 
-- Garder le frontend et le backend deployables ensemble sur OVH.
-- Utiliser des URLs relatives `/api` pour eviter les problemes CORS en production.
-- Reprendre la structure locale qui fonctionne deja avec `suiviseries` et `suiviseries-api`.
-- Isoler les appels Open-Meteo dans le backend.
-- Garder l'UI Angular reactive, testable et facile a faire evoluer.
+- keep frontend and backend deployable together on OVH
+- use relative `/api` URLs so the frontend works through the same-origin backend in production
+- preserve the local development shape that already works for sibling Jelix projects
+- isolate Open-Meteo integration in the backend
+- keep the Angular UI reactive, testable, and easy to evolve
 
-## Vue D'Ensemble
+## High-Level Flow
 
 ```text
 Angular 21 UI
     |
-    | HTTP relatif /api/*
+    | Relative HTTP /api/*
     v
-Angular dev proxy en local
+Angular dev proxy in local development
     |
     | http://localhost:8888/meteo360/www/
     v
-Apache/MAMP ou OVH
+Apache/MAMP or OVH
     |
     v
 www/.htaccess
     |
     | /api/* -> www/index.php/api/*
     v
-Jelix controller commun~default
+Jelix controller: commun~default
     |
     v
-Jelix service commun~weather
+Jelix service: commun~weather
     |
     v
 Open-Meteo APIs
 ```
 
-## Structure Du Depot
+## Repository Structure
 
 ```text
 meteo360/
@@ -67,7 +67,7 @@ meteo360/
     +-- dist/
 ```
 
-## Frontend Angular
+## Frontend Architecture
 
 ### Stack
 
@@ -75,74 +75,85 @@ meteo360/
 - TypeScript 5.9
 - Angular Material 21
 - RxJS 7.8
-- Signals Angular
-- Transloco + Transloco MessageFormat
-- Vitest via Angular unit-test builder
+- Angular Signals
+- Transloco and Transloco MessageFormat
+- Vitest through Angular's unit-test builder
 
-### Composant Racine
+### Root Component Responsibilities
 
-Le composant `App` dans `frontend/src/app/app.ts` porte le MVP:
+The MVP is currently hosted in the root `App` component in `frontend/src/app/app.ts`.
 
-- `searchControl` pour la ville recherchee
-- `places` pour les resultats geocodes
-- `selectedPlace` pour la ville active
-- `forecast` pour les previsions
-- `loadingPlaces`, `loadingForecast`, `error` pour les etats UI
-- `dailyPreview` et `hourlyPreview` comme `computed()`
+It owns:
 
-### Service HTTP Frontend
+- the search form state
+- the place search results
+- the selected place
+- the loaded forecast
+- loading, location, and error UI state
+- computed hourly and daily preview data for rendering
 
-`frontend/src/app/services/weather.service.ts` est la frontiere API Angular.
+### Frontend API Boundary
 
-Regles:
+`frontend/src/app/services/weather.service.ts` is the Angular API boundary.
 
-- Garder `apiBaseUrl = '/api'`.
-- Ne pas mettre d'URL OVH ou MAMP directement dans les composants.
-- Mapper les enveloppes API vers les modeles TypeScript.
-- Laisser le composant gerer l'affichage des etats d'erreur et chargement.
+Rules enforced by the current implementation:
 
-## Internationalisation
+- keep `apiBaseUrl = '/api'`
+- do not hardcode OVH or MAMP URLs in components
+- map API envelopes to frontend models in the service
+- keep UI loading and error presentation in the component layer
 
-Meteo360 suit le meme modele que `suiviseries`:
+## Internationalization
 
-- traductions TypeScript dans `frontend/src/app/i18n/fr.ts`
-- loader inline dans `frontend/src/app/app.config.ts`
-- `TranslocoModule` importe dans les composants
-- helper de test dans `frontend/src/app/testing/transloco-testing.module.ts`
+Meteo360 follows the same inline Transloco pattern used by the sibling projects:
 
-Aucun fichier JSON de traduction n'est attendu pour le MVP.
+- translations are stored in `frontend/src/app/i18n/fr.ts`
+- the inline loader lives in `frontend/src/app/app.config.ts`
+- standalone components import `TranslocoModule`
+- tests use `frontend/src/app/testing/transloco-testing.module.ts`
 
-## Backend Jelix
+The MVP does not use JSON translation assets.
 
-### Point D'Entree
+## Backend Architecture
 
-`www/index.php` charge:
+### Entry Point
 
-- les headers de securite
-- `application.init.php`
-- `jClassicRequest`
-- la config `index/config.ini.php`
-- le coordinateur Jelix
+`www/index.php` boots Jelix and serves the API through the public `www/` directory.
 
-### Configuration
+### Routing
 
-`application.init.php` initialise Jelix et declare:
-
-- `modules/`
-- `plugins/`
-- le temp base path dans `../jelix/temp/meteo360/`
-
-`app/system/urls.xml` declare les routes significatives:
+`app/system/urls.xml` declares the current public routes:
 
 ```text
-/api          -> default:index
-/api/places   -> default:places
+/            -> default:index
+/api         -> default:index
+/api/places  -> default:places
 /api/forecast -> default:forecast
 ```
 
-### Conventions Jelix
+### Controller Responsibilities
 
-Les selecteurs Jelix imposent le nom du fichier et de la classe:
+`modules/commun/controllers/default.classic.php`:
+
+- normalizes request parameters
+- adds CORS headers for the allowed origins
+- serves the API status endpoint
+- exposes `/api/places` and `/api/forecast`
+- returns Jelix JSON responses with stable envelopes and HTTP status codes
+
+### Weather Service Responsibilities
+
+`modules/commun/classes/weather.class.php`:
+
+- calls the Open-Meteo geocoding API
+- calls the Open-Meteo forecast API
+- validates coordinates before provider requests
+- normalizes provider data into Meteo360-specific response shapes
+- applies provider request timeouts and basic error handling
+
+### Jelix Naming Rules
+
+Jelix selectors require exact file and class names:
 
 ```text
 jClasses::getService('commun~weather')
@@ -150,51 +161,35 @@ modules/commun/classes/weather.class.php
 class weather
 ```
 
-Ne pas utiliser des noms de type `weather.service.php` pour les classes chargees par `jClasses`.
+Do not rename this service to `weatherService` or `weather.service.php`.
 
-## Routage Apache
+## Hosting And Routing
 
-`www/.htaccess` gere trois responsabilites:
+`www/.htaccess` has three responsibilities:
 
-- redirections permanentes vers le domaine canonique en production
-- routage `/api` vers Jelix
-- fallback Angular vers `www/dist/index.html`
+- permanent redirects to the canonical production domain
+- `/api` routing to Jelix
+- SPA fallback to `www/dist/index.html`
 
-Le fichier doit rester compatible avec:
+It must stay compatible with both environments:
 
 ```text
 Local:      http://localhost:8888/meteo360/www/
 Production: https://meteo360.zeffyr.com/
 ```
 
-## Donnees Et Fournisseur Meteo
+## Weather Provider Boundary
 
-Open-Meteo est appele uniquement cote backend:
+Open-Meteo is called only from the backend:
 
 - `https://geocoding-api.open-meteo.com/v1/search`
 - `https://api.open-meteo.com/v1/forecast`
 
-Le frontend ne doit pas dependre directement des structures Open-Meteo brutes. Le backend renvoie une structure stable adaptee a l'application.
+The frontend must not consume raw Open-Meteo responses directly. Meteo360 owns the public API contract exposed to Angular.
 
-## CI Et Deploiement
+## Deployment Constraints
 
-CI:
-
-- lint frontend
-- tests Angular
-- build production Angular
-- lint syntaxique PHP
-
-Deploiement:
-
-- declenche sur `main` ou manuellement
-- construit `frontend`
-- prepare un repertoire `release`
-- envoie vers OVH via SFTP/password avec `lftp`
-
-## Decisions Importantes
-
-- Le MVP reste sans base de donnees.
-- Le backend reste compatible PHP 7.4 localement.
-- Le build Angular sort directement dans `www/dist`, sans sous-dossier `browser`.
-- Les commits sont faits manuellement par le mainteneur.
+- the full repository is deployed, but OVH must serve the `www/` directory as the document root
+- the Angular production build must land in `www/dist`
+- PHP backend code must remain compatible with PHP 7.4 for local validation
+- no Docker, database, queue, or background worker should be introduced unless the project scope changes
