@@ -123,6 +123,11 @@ jobs:
           OVH_SFTP_PASSWORD: ${{ secrets.OVH_SFTP_PASSWORD }}
         run: |
           write_test_dir=".deploy-write-test-$(date +%s)-$$"
+          create_remote_target_command="mkdir -p \"$REMOTE_DIR\""
+
+          if [[ "$REMOTE_DIR" == "." ]]; then
+            create_remote_target_command="pwd"
+          fi
 
           lftp -u "$OVH_SFTP_USER","$OVH_SFTP_PASSWORD" -p "$OVH_SFTP_PORT" "sftp://$OVH_SFTP_HOST" <<EOF
           set cmd:fail-exit yes
@@ -130,7 +135,7 @@ jobs:
           set net:timeout 30
           set sftp:auto-confirm yes
           pwd
-          mkdir -p "$REMOTE_DIR"
+          $create_remote_target_command
           cd "$REMOTE_DIR"
           pwd
           mkdir -p app
@@ -154,13 +159,19 @@ jobs:
           OVH_SFTP_USER: ${{ secrets.OVH_SFTP_USER }}
           OVH_SFTP_PASSWORD: ${{ secrets.OVH_SFTP_PASSWORD }}
         run: |
+          create_remote_target_command="mkdir -p \"$REMOTE_DIR\""
+
+          if [[ "$REMOTE_DIR" == "." ]]; then
+            create_remote_target_command="pwd"
+          fi
+
           lftp -u "$OVH_SFTP_USER","$OVH_SFTP_PASSWORD" -p "$OVH_SFTP_PORT" "sftp://$OVH_SFTP_HOST" <<EOF
           set cmd:fail-exit yes
           set net:max-retries 2
           set net:timeout 30
           set sftp:auto-confirm yes
           lcd release
-          mkdir -p "$REMOTE_DIR"
+          $create_remote_target_command
           cd "$REMOTE_DIR"
           mkdir -p var/cache
           mkdir -p var/log
