@@ -1,6 +1,13 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Allow index.php to receive PATH_INFO (e.g. /index.php/api/forecast).
+    # AcceptPathInfo is scoped to index.php only to avoid side effects on static assets.
+    # Requires Apache 2.4+ (OVH mutualisé and MAMP >= 5 both ship Apache 2.4).
+    <Files "index.php">
+        AcceptPathInfo On
+    </Files>
+
     RewriteCond %{HTTP_HOST} ^(www\.)?meteo360\.zeffyr\.com$ [NC]
     RewriteCond %{HTTPS} !=on [OR]
     RewriteCond %{HTTP_HOST} ^www\.meteo360\.zeffyr\.com$ [NC]
@@ -12,8 +19,10 @@
     RewriteCond %{HTTP_HOST} ^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
     RewriteRule ^api/(.*)$ /meteo360/www/index.php/api/$1 [L,QSA]
 
-    RewriteRule ^api/?$ /index.php/api [L,QSA]
-    RewriteRule ^api/(.*)$ /index.php/api/$1 [L,QSA]
+    # [END] stops all subsequent rewrite passes (Apache 2.4+), preventing the SPA
+    # fallback from matching the rewritten /index.php/api/... URI on a second pass.
+    RewriteRule ^api/?$ /index.php/api [END,QSA]
+    RewriteRule ^api/(.*)$ /index.php/api/$1 [END,QSA]
 
     RewriteCond %{HTTP_HOST} ^(localhost|127\.0\.0\.1)(:[0-9]+)?$ [NC]
     RewriteRule ^$ /meteo360/www/dist/index.html [L]
