@@ -75,10 +75,10 @@ Known non-secret project values:
 OVH_SFTP_HOST=ssh.cluster103.hosting.ovh.net
 OVH_SFTP_PORT=22
 OVH_SFTP_USER=zeffyr-meteo360
-OVH_SFTP_REMOTE_DIR=www/meteo360
+OVH_SFTP_REMOTE_DIR=/
 ```
 
-`OVH_SFTP_REMOTE_DIR` must point to the Meteo360 project directory visible from the current SFTP session. Use a project-specific relative path such as `www/meteo360` when the account sees a broader root. Use `/` only when the SFTP session already opens in the Meteo360 project directory itself, not in a broader OVH hosting home. Dot segments (`.` and `..`), dot-prefixed path segments, and whitespace are rejected by the workflow.
+The OVH SFTP account is dedicated to Meteo360 and its session root is the project directory. The canonical value of `OVH_SFTP_REMOTE_DIR` is therefore `/`, which the workflow normalises to `.`. A safe relative path (for example `www/meteo360`) is still accepted for accounts that see a broader root. Dot segments (`.` and `..`), dot-prefixed segments, and unsafe characters are rejected by the workflow.
 
 ## Deployment Pipeline
 
@@ -93,15 +93,11 @@ The production workflow currently performs these steps:
 7. Set up PHP 7.4 in CI.
 8. Run PHP syntax validation outside `frontend/` and `www/dist/`.
 9. Check that the OVH SFTP secrets are present.
-10. Validate that the OVH SFTP target is a project directory, not the SFTP root.
+10. Validate that the OVH SFTP target is the project directory (`/`) or a safe relative path.
 11. Prepare a targeted `release/` directory with only deployable paths.
 12. Install `lftp`.
-13. Run an SFTP preflight to create the project directory if needed, verify the remote target, detect a broader hosting root when `/` is misused, and confirm write access.
+13. Run an SFTP preflight that resolves the target directory and confirms write access with a temporary `mkdir`/`rmdir` probe.
 14. Upload the release through SFTP using scoped sync operations.
-
-Optional GitHub Actions variable:
-
-- `OVH_STRICT_REMOTE_DIR_VALIDATION=true` to make the preflight fail when `/` looks like an OVH hosting home instead of the Meteo360 project directory. By default, that heuristic emits a warning and continues because it can also match a legitimate first deployment to an empty project root that still contains OVH's default `www/` directory.
 
 ## Release Contents
 
@@ -128,13 +124,13 @@ Not managed by the release artifact:
 
 The workflow provisions only the runtime directories that are currently required inside the deployed project directory:
 
-- `var/cache/`
 - `var/log/`
 - `var/sessions/`
 
 The workflow does not manage:
 
-- `../jelix/temp/meteo360/` because it is outside `OVH_SFTP_REMOTE_DIR`
+- `../jelix/temp/meteo360/` because it is outside `OVH_SFTP_REMOTE_DIR`, and is also where Jelix temp and cache are configured (see `application.init.php`)
+- `var/cache/` because the Jelix cache lives in the external temp path above
 - `var/temp/` because the current Jelix temp path is outside the deployed project directory
 - `var/meteo-cache/` because it is not used by the current application code
 
