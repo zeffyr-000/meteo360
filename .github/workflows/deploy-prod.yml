@@ -67,35 +67,30 @@ jobs:
         env:
           OVH_SFTP_REMOTE_DIR: ${{ secrets.OVH_SFTP_REMOTE_DIR }}
         run: |
+          # The OVH SFTP account is scoped to the Meteo360 project directory.
+          # The recommended value is `/`, which is normalised to `.` (session root).
+          # A relative path (e.g. `www/meteo360`) is still accepted for back-compat.
           squeezed_remote_dir="$(printf '%s' "$OVH_SFTP_REMOTE_DIR" | tr -s '/')"
-          use_session_root=false
 
           case "$squeezed_remote_dir" in
             "/")
               normalized_remote_dir="."
-              use_session_root=true
               ;;
             "."|"./")
-              echo "OVH_SFTP_REMOTE_DIR values . and ./ are invalid. Use / when the SFTP account is already scoped to the Meteo360 project directory, or use a relative path such as www/meteo360." >&2
+              echo "OVH_SFTP_REMOTE_DIR values . and ./ are invalid. Use / when the SFTP account is scoped to the Meteo360 project directory, or use a safe relative path such as www/meteo360 when the account has a broader SFTP root." >&2
               exit 1
               ;;
             *)
               normalized_remote_dir="$(printf '%s' "$squeezed_remote_dir" | sed -E 's#^/##; s#/$##')"
+              if [[ -z "$normalized_remote_dir" \
+                || ! "$normalized_remote_dir" =~ ^[A-Za-z0-9._/-]+$ \
+                || "$normalized_remote_dir" =~ (^|/)\.\.?(/|$) \
+                || "$normalized_remote_dir" =~ (^|/)\.[^/]+(/|$) ]]; then
+                echo "OVH_SFTP_REMOTE_DIR must be / (project-scoped SFTP account) or a safe relative path. Only letters, digits, slash, dot, underscore, and hyphen are allowed; dot segments and dot-prefixed segments are not allowed." >&2
+                exit 1
+              fi
               ;;
           esac
-
-          if [[ -z "$normalized_remote_dir" ]]; then
-            echo "OVH_SFTP_REMOTE_DIR must not be empty. Use a project-specific relative path such as www/meteo360, or use / when the SFTP account is already scoped to the Meteo360 project directory." >&2
-            exit 1
-          fi
-
-          if [[ "$use_session_root" != true && ( \
-            ! "$normalized_remote_dir" =~ ^[A-Za-z0-9._/-]+$ \
-            || "$normalized_remote_dir" =~ (^|/)\.\.?(/|$) \
-            || "$normalized_remote_dir" =~ (^|/)\.[^/]+(/|$) ) ]]; then
-            echo "OVH_SFTP_REMOTE_DIR must point to the Meteo360 project directory relative to the SFTP root, for example www/meteo360. Only letters, digits, slash (/), dot (.), underscore (_), and hyphen (-) are allowed. Dot segments and dot-prefixed segments are not allowed. Use / only when the SFTP account is already scoped to the Meteo360 project directory." >&2
-            exit 1
-          fi
 
           printf 'REMOTE_DIR=%s\n' "$normalized_remote_dir" >> "$GITHUB_ENV"
 
@@ -121,53 +116,12 @@ jobs:
           OVH_SFTP_PORT: ${{ secrets.OVH_SFTP_PORT }}
           OVH_SFTP_USER: ${{ secrets.OVH_SFTP_USER }}
           OVH_SFTP_PASSWORD: ${{ secrets.OVH_SFTP_PASSWORD }}
-          OVH_STRICT_REMOTE_DIR_VALIDATION: ${{ vars.OVH_STRICT_REMOTE_DIR_VALIDATION }}
         run: |
           write_test_dir=".deploy-write-test-$(date +%s)-$$"
-          www_write_test_dir="${write_test_dir}-www"
           create_remote_target_command=""
 
           if [[ "$REMOTE_DIR" != "." ]]; then
             create_remote_target_command="mkdir -p \"$REMOTE_DIR\""
-          fi
-
-          remote_target_snapshot="$(
-            lftp -u "$OVH_SFTP_USER","$OVH_SFTP_PASSWORD" -p "$OVH_SFTP_PORT" "sftp://$OVH_SFTP_HOST" <<EOF
-          set cmd:fail-exit yes
-          set net:max-retries 2
-          set net:timeout 30
-          set sftp:auto-confirm yes
-          $create_remote_target_command
-          cd "$REMOTE_DIR"
-          pwd
-          cls -1
-          quit
-          EOF
-          )"
-
-          remote_target_path="$(printf '%s\n' "$remote_target_snapshot" | sed -n '1p')"
-          remote_target_entry_count="$(printf '%s\n' "$remote_target_snapshot" | tail -n +2 | sed '/^$/d' | wc -l | tr -d ' ')"
-
-          if [[ "${RUNNER_DEBUG:-0}" == "1" ]]; then
-            printf '%s\n' "$remote_target_snapshot"
-          else
-            printf 'Resolved remote deployment target: %s\n' "$remote_target_path"
-            printf 'Visible entries in deployment target: %s\n' "$remote_target_entry_count"
-          fi
-
-          if [[ "$REMOTE_DIR" == "." ]] && grep -qx 'www' <<<"$remote_target_snapshot" && ! grep -qx 'application.init.php' <<<"$remote_target_snapshot"; then
-            strict_remote_dir_validation="${OVH_STRICT_REMOTE_DIR_VALIDATION:-false}"
-            remote_dir_warning="The current SFTP session root may be the OVH hosting home rather than the Meteo360 project directory. This can be valid for a first deployment to an empty project root that only contains OVH's default www/ directory. Verify OVH_SFTP_REMOTE_DIR carefully; for a nested deployment, use the project path visible from the current session, for example www/meteo360."
-
-            case "$strict_remote_dir_validation" in
-              true|1|yes|on)
-                echo "$remote_dir_warning" >&2
-                exit 1
-                ;;
-              *)
-                echo "WARNING: $remote_dir_warning Continuing because OVH_STRICT_REMOTE_DIR_VALIDATION is not enabled." >&2
-                ;;
-            esac
           fi
 
           lftp -u "$OVH_SFTP_USER","$OVH_SFTP_PASSWORD" -p "$OVH_SFTP_PORT" "sftp://$OVH_SFTP_HOST" <<EOF
@@ -177,42 +131,11 @@ jobs:
           set sftp:auto-confirm yes
           $create_remote_target_command
           cd "$REMOTE_DIR"
+          pwd
           mkdir "$write_test_dir"
           rmdir "$write_test_dir"
           quit
           EOF
-
-          if grep -qx 'www' <<<"$remote_target_snapshot"; then
-            if ! lftp -u "$OVH_SFTP_USER","$OVH_SFTP_PASSWORD" -p "$OVH_SFTP_PORT" "sftp://$OVH_SFTP_HOST" <<EOF
-          set cmd:fail-exit yes
-          set net:max-retries 2
-          set net:timeout 30
-          set sftp:auto-confirm yes
-          cd "$REMOTE_DIR"
-          cd www
-          quit
-          EOF
-            then
-              echo "Remote www entry exists but is not a directory or is not accessible from the resolved deployment target. Check OVH_SFTP_REMOTE_DIR and the type or permissions of the remote www entry." >&2
-              exit 1
-            fi
-
-            if ! lftp -u "$OVH_SFTP_USER","$OVH_SFTP_PASSWORD" -p "$OVH_SFTP_PORT" "sftp://$OVH_SFTP_HOST" <<EOF
-          set cmd:fail-exit yes
-          set net:max-retries 2
-          set net:timeout 30
-          set sftp:auto-confirm yes
-          cd "$REMOTE_DIR"
-          cd www
-          mkdir "$www_write_test_dir"
-          rmdir "$www_write_test_dir"
-          quit
-          EOF
-            then
-              echo "Remote www/ directory exists but is not writable from the resolved deployment target. Check OVH_SFTP_REMOTE_DIR and the ownership or permissions of the remote www/ directory." >&2
-              exit 1
-            fi
-          fi
 
       - name: Upload release to OVH SFTP
         env:
@@ -227,6 +150,10 @@ jobs:
             create_remote_target_command="mkdir -p \"$REMOTE_DIR\""
           fi
 
+          # var/cache is intentionally not created here:
+          # Jelix temp/cache lives at ../jelix/temp/meteo360, outside the SFTP scope.
+          # var/log is provisioned because Jelix writes file logs to var/log/ (see app/system/mainconfig.ini.php).
+          # var/sessions is provisioned because Jelix sessions use app:var/sessions/.
           lftp -u "$OVH_SFTP_USER","$OVH_SFTP_PASSWORD" -p "$OVH_SFTP_PORT" "sftp://$OVH_SFTP_HOST" <<EOF
           set cmd:fail-exit yes
           set net:max-retries 2
@@ -235,7 +162,7 @@ jobs:
           lcd release
           $create_remote_target_command
           cd "$REMOTE_DIR"
-          mkdir -p var/cache
+          mkdir -p var
           mkdir -p var/log
           mkdir -p var/sessions
           mirror --reverse --delete --verbose app app
