@@ -162,9 +162,14 @@ jobs:
           lcd release
           $create_remote_target_command
           cd "$REMOTE_DIR"
+          set cmd:fail-exit no
           mkdir -p var
           mkdir -p var/log
           mkdir -p var/sessions
+          set cmd:fail-exit yes
+          cls -d var
+          cls -d var/log
+          cls -d var/sessions
           mirror --reverse --delete --verbose app app
           mirror --reverse --delete --verbose modules modules
           mirror --reverse --delete --verbose plugins plugins
