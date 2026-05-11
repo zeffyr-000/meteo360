@@ -1,12 +1,12 @@
+# Allow index.php to receive PATH_INFO (e.g. /index.php/api/forecast).
+# Scoped to index.php only to avoid side effects on static assets.
+# Must be outside <IfModule> to be evaluated by Apache on all configurations.
+<Files "index.php">
+    AcceptPathInfo On
+</Files>
+
 <IfModule mod_rewrite.c>
     RewriteEngine On
-
-    # Allow index.php to receive PATH_INFO (e.g. /index.php/api/forecast).
-    # AcceptPathInfo is scoped to index.php only to avoid side effects on static assets.
-    # Requires Apache 2.4+ (OVH mutualisé and MAMP >= 5 both ship Apache 2.4).
-    <Files "index.php">
-        AcceptPathInfo On
-    </Files>
 
     RewriteCond %{HTTP_HOST} ^(www\.)?meteo360\.zeffyr\.com$ [NC]
     RewriteCond %{HTTPS} !=on [OR]
