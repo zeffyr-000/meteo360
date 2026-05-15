@@ -1,13 +1,12 @@
-<ng-container *transloco="let t">
   @if (locating()) {
     <div class="state state--loading">
       <mat-spinner diameter="32" />
-      <span>{{ t('location.detecting') }}</span>
+      <span>{{ 'location.detecting' | transloco }}</span>
     </div>
   } @else if (loading()) {
     <div class="state state--loading">
       <mat-spinner diameter="32" />
-      <span>{{ t('weather.loading_forecast') }}</span>
+      <span>{{ 'weather.loading_forecast' | transloco }}</span>
     </div>
   } @else if (current(); as currentWeather) {
     <article
@@ -25,20 +24,20 @@
           @if (isLive()) {
             <span class="badge badge--live">
               <span class="badge__dot" aria-hidden="true"></span>
-              {{ t('weather.now') }}
+              {{ 'weather.now' | transloco }}
             </span>
           } @else {
             <button mat-stroked-button type="button" class="badge badge--preview"
-              [attr.aria-label]="t('weather.back_to_live')"
-              [matTooltip]="t('weather.back_to_live')"
+              [attr.aria-label]="'weather.back_to_live' | transloco"
+              [matTooltip]="'weather.back_to_live' | transloco"
               (click)="backToNow()">
               <mat-icon>schedule</mat-icon>
-              {{ t('weather.preview_at', { time: (displayTime() | date: 'HH:mm') }) }}
+              {{ 'weather.preview_at' | transloco: { time: (displayTime() | date: 'HH:mm') } }}
               <mat-icon>close</mat-icon>
             </button>
           }
           <h2 class="hero__place">
-            {{ isCurrentLocation() ? t('location.current_name') : selectedPlace()?.name }}
+            {{ isCurrentLocation() ? ('location.current_name' | transloco) : selectedPlace()?.name }}
           </h2>
           @if (!isCurrentLocation() && placeMeta()) {
             <p class="hero__meta">{{ placeMeta() }}</p>
@@ -56,7 +55,7 @@
             <span class="hero__temp-value">{{ temperature() | number: '1.0-0' }}</span>
             <span class="hero__temp-unit">°C</span>
           </div>
-          <p class="hero__condition">{{ t(labelKey(weatherCode())) }}</p>
+          <p class="hero__condition">{{ labelKey(weatherCode()) | transloco }}</p>
           <div class="hero__chips">
             @if (displayTime(); as time) {
               <span class="hero__chip">
@@ -72,7 +71,7 @@
             }
             <span class="hero__chip">
               <mat-icon>{{ currentWeather.is_day === 1 ? 'wb_sunny' : 'nights_stay' }}</mat-icon>
-              {{ currentWeather.is_day === 1 ? t('weather.day') : t('weather.night') }}
+              {{ currentWeather.is_day === 1 ? ('weather.day' | transloco) : ('weather.night' | transloco) }}
             </span>
           </div>
         </div>
@@ -81,7 +80,7 @@
           <div class="metric metric--primary">
             <mat-icon>device_thermostat</mat-icon>
             <div>
-              <span class="metric__label">{{ t('weather.feels_like') }}</span>
+              <span class="metric__label">{{ 'weather.feels_like' | transloco }}</span>
               @if (isLive()) {
                 <strong>{{ currentWeather.apparent_temperature | number: '1.0-0' }}°C</strong>
               } @else {
@@ -92,14 +91,14 @@
           <div class="metric metric--primary">
             <mat-icon>grain</mat-icon>
             <div>
-              <span class="metric__label">{{ t('weather.rain') }}</span>
+              <span class="metric__label">{{ 'weather.rain' | transloco }}</span>
               <strong>{{ precipitationLabel().value | number: '1.0-1' }} {{ precipitationLabel().unit }}</strong>
             </div>
           </div>
           <div class="metric metric--primary">
             <mat-icon>air</mat-icon>
             <div>
-              <span class="metric__label">{{ t('weather.wind') }}</span>
+              <span class="metric__label">{{ 'weather.wind' | transloco }}</span>
               <strong>{{ windSpeed() | number: '1.0-0' }} km/h</strong>
             </div>
           </div>
@@ -109,19 +108,19 @@
       @if (isLive()) {
         <dl class="meta-list">
           <div>
-            <dt>{{ t('weather.humidity') }}</dt>
+            <dt>{{ 'weather.humidity' | transloco }}</dt>
             <dd>{{ currentWeather.relative_humidity_2m }}%</dd>
           </div>
           <div>
-            <dt>{{ t('weather.cloud_cover') }}</dt>
+            <dt>{{ 'weather.cloud_cover' | transloco }}</dt>
             <dd>{{ currentWeather.cloud_cover }}%</dd>
           </div>
           <div>
-            <dt>{{ t('weather.wind_direction') }}</dt>
+            <dt>{{ 'weather.wind_direction' | transloco }}</dt>
             <dd>{{ currentWeather.wind_direction_10m | number: '1.0-0' }}°</dd>
           </div>
           <div>
-            <dt>{{ t('weather.updated_at') }}</dt>
+            <dt>{{ 'weather.updated_at' | transloco }}</dt>
             <dd>{{ currentWeather.time | date: 'HH:mm' }}</dd>
           </div>
         </dl>
@@ -130,8 +129,7 @@
   } @else {
     <div class="state state--empty">
       <mat-icon>wb_cloudy</mat-icon>
-      <h2>{{ t('weather.choose_city_title') }}</h2>
-      <p>{{ t('weather.choose_city_message') }}</p>
+      <h2>{{ 'weather.choose_city_title' | transloco }}</h2>
+      <p>{{ 'weather.choose_city_message' | transloco }}</p>
     </div>
   }
-</ng-container>

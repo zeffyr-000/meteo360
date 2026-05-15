@@ -1,0 +1,36 @@
+<div class="dashboard-shell">
+  <div class="notices">
+    @if (locationState.noticeKey(); as noticeKey) {
+      <p class="notice">
+        <mat-icon>{{ locationState.locating() ? 'gps_fixed' : 'my_location' }}</mat-icon>
+        <span>{{ noticeKey | transloco }}</span>
+      </p>
+    }
+    @if (forecastState.errorKey(); as errorKey) {
+      <p class="notice notice--error">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorKey | transloco }}</span>
+      </p>
+    }
+    @if (locationState.errorKey(); as errorKey) {
+      <p class="notice notice--error">
+        <mat-icon>error_outline</mat-icon>
+        <span>{{ errorKey | transloco }}</span>
+      </p>
+    }
+  </div>
+
+  <div class="dashboard-grid">
+    <section class="hero" aria-live="polite">
+      <app-current-conditions />
+    </section>
+
+    <section class="overview-section" [attr.aria-label]="'forecast.title' | transloco">
+      <app-forecast-overview />
+    </section>
+
+    <section class="timeline-section" [attr.aria-label]="'timeline.title' | transloco">
+      <app-weather-timeline />
+    </section>
+  </div>
+</div>

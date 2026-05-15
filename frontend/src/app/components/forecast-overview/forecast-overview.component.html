@@ -1,28 +1,27 @@
-<ng-container *transloco="let t">
   @if (hasForecast()) {
     <div class="forecast-overview">
       <article class="forecast-panel forecast-panel--trend">
         <header class="forecast-panel__head">
           <div>
-            <span class="forecast-panel__eyebrow">{{ t('forecast.eyebrow') }}</span>
-            <h3>{{ t('forecast.trend_title') }}</h3>
+            <span class="forecast-panel__eyebrow">{{ 'forecast.eyebrow' | transloco }}</span>
+            <h3>{{ 'forecast.trend_title' | transloco }}</h3>
           </div>
-          <span class="forecast-panel__hint">{{ t('forecast.trend_hint') }}</span>
+          <span class="forecast-panel__hint">{{ 'forecast.trend_hint' | transloco }}</span>
         </header>
 
         @if (hourlyTrend().length > 0) {
-          <div class="trend" role="list" [attr.aria-label]="t('forecast.trend_aria')">
+          <div class="trend" role="list" [attr.aria-label]="'forecast.trend_aria' | transloco">
             @for (point of hourlyTrend(); track trendKey(point)) {
               <button
                 type="button"
                 role="listitem"
                 class="trend__point"
                 [class.is-selected]="isSelected(point)"
-                [attr.aria-label]="t('forecast.trend_point_aria', {
+                [attr.aria-label]="'forecast.trend_point_aria' | transloco: {
                   time: (point.time | date: 'HH:mm'),
                   temp: (point.temperature | number: '1.0-0'),
                   rain: point.precipitationProbability
-                })"
+                }"
                 (click)="selectHour(point)"
               >
                 <span class="trend__temp">{{ point.temperature | number: '1.0-0' }}°</span>
@@ -35,32 +34,32 @@
             }
           </div>
         } @else {
-          <p class="forecast-empty">{{ t('forecast.empty') }}</p>
+          <p class="forecast-empty">{{ 'forecast.empty' | transloco }}</p>
         }
       </article>
 
       <article class="forecast-panel forecast-panel--days">
         <header class="forecast-panel__head">
           <div>
-            <span class="forecast-panel__eyebrow">{{ t('forecast.range_eyebrow') }}</span>
-            <h3>{{ t('forecast.days_title') }}</h3>
+            <span class="forecast-panel__eyebrow">{{ 'forecast.range_eyebrow' | transloco }}</span>
+            <h3>{{ 'forecast.days_title' | transloco }}</h3>
           </div>
-          <span class="forecast-panel__hint">{{ t('forecast.days_hint') }}</span>
+          <span class="forecast-panel__hint">{{ 'forecast.days_hint' | transloco }}</span>
         </header>
 
         @if (dailyOverview().length > 0) {
-          <div class="days" role="list" [attr.aria-label]="t('forecast.days_aria')">
+          <div class="days" role="list" [attr.aria-label]="'forecast.days_aria' | transloco">
             @for (day of dailyOverview(); track dayKey(day); let first = $first) {
               <div class="day" role="listitem">
                 <div class="day__date">
-                  <span>{{ first ? t('forecast.today') : (day.time | date: 'EEE') }}</span>
+                  <span>{{ first ? ('forecast.today' | transloco) : (day.time | date: 'EEE') }}</span>
                   <small>{{ day.time | date: 'd MMM' }}</small>
                 </div>
                 <mat-icon class="day__icon" aria-hidden="true">{{ icon(day.weatherCode) }}</mat-icon>
-                <div class="day__range" [attr.aria-label]="t('forecast.range_aria', {
+                <div class="day__range" [attr.aria-label]="'forecast.range_aria' | transloco: {
                   min: (day.min | number: '1.0-0'),
                   max: (day.max | number: '1.0-0')
-                })">
+                }">
                   <span class="day__range-track" aria-hidden="true">
                     <span
                       class="day__range-fill"
@@ -87,9 +86,8 @@
             }
           </div>
         } @else {
-          <p class="forecast-empty">{{ t('forecast.empty') }}</p>
+          <p class="forecast-empty">{{ 'forecast.empty' | transloco }}</p>
         }
       </article>
     </div>
   }
-</ng-container>

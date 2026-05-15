@@ -1,75 +1,95 @@
-<main class="shell" *transloco="let t">
-  <header class="topbar">
-    <div class="brand">
-      <span class="brand__mark" aria-hidden="true">
+<mat-sidenav-container class="app-container">
+
+  <mat-sidenav
+    mode="over"
+    [opened]="menuOpen()"
+    (openedChange)="menuOpen.set($event)"
+  >
+    <div class="sidenav-brand">
+      <span class="sidenav-brand__mark" aria-hidden="true">
         <mat-icon>cloud</mat-icon>
       </span>
-      <span class="brand__copy">
-        <span class="brand__eyebrow">{{ t('app.eyebrow') }}</span>
-        <span class="brand__name">{{ t('app.title') }}</span>
-        <span class="brand__subtitle">{{ t('app.subtitle') }}</span>
-      </span>
+      <span class="sidenav-brand__name">{{ 'app.title' | transloco }}</span>
     </div>
 
-    <div class="topbar__actions">
-      <span class="topbar__status">
-        <mat-icon>{{ forecastState.loading() || locationState.locating() ? 'sync' : 'bolt' }}</mat-icon>
-        {{ forecastState.loading() || locationState.locating() ? t('app.syncing') : t('app.live_dashboard') }}
-      </span>
+    <mat-nav-list>
+      <a
+        mat-list-item
+        routerLink="/"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="active-link"
+        (click)="menuOpen.set(false)"
+      >
+        <mat-icon matListItemIcon>cloud</mat-icon>
+        <span matListItemTitle>{{ 'nav.home' | transloco }}</span>
+      </a>
+
+      <a
+        mat-list-item
+        routerLink="/legal"
+        [routerLinkActiveOptions]="{ exact: true }"
+        routerLinkActive="active-link"
+        (click)="menuOpen.set(false)"
+      >
+        <mat-icon matListItemIcon>gavel</mat-icon>
+        <span matListItemTitle>{{ 'nav.legal' | transloco }}</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <header class="app-toolbar">
       <button
         mat-icon-button
         type="button"
-        [attr.aria-label]="t('search.open_tooltip')"
-        [matTooltip]="t('search.open_tooltip')"
-        (click)="openSearch()"
+        [attr.aria-label]="menuOpen() ? ('nav.close_menu' | transloco) : ('nav.open_menu' | transloco)"
+        [matTooltip]="menuOpen() ? ('nav.close_menu' | transloco) : ('nav.open_menu' | transloco)"
+        (click)="toggleMenu()"
       >
-        <mat-icon>search</mat-icon>
+        <mat-icon>menu</mat-icon>
       </button>
-      <button
-        mat-icon-button
-        type="button"
-        [attr.aria-label]="t('app.refresh')"
-        [matTooltip]="t('app.refresh')"
-        [disabled]="forecastState.loading() || locationState.locating()"
-        (click)="refresh()"
-      >
-        <mat-icon>refresh</mat-icon>
-      </button>
-    </div>
-  </header>
 
-  <div class="notices">
-    @if (locationState.noticeKey(); as noticeKey) {
-      <p class="notice">
-        <mat-icon>{{ locationState.locating() ? 'gps_fixed' : 'my_location' }}</mat-icon>
-        <span>{{ t(noticeKey) }}</span>
-      </p>
-    }
-    @if (forecastState.errorKey(); as errorKey) {
-      <p class="notice notice--error">
-        <mat-icon>error_outline</mat-icon>
-        <span>{{ t(errorKey) }}</span>
-      </p>
-    }
-    @if (locationState.errorKey(); as errorKey) {
-      <p class="notice notice--error">
-        <mat-icon>error_outline</mat-icon>
-        <span>{{ t(errorKey) }}</span>
-      </p>
-    }
-  </div>
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true">
+          <mat-icon>cloud</mat-icon>
+        </span>
+        <span class="brand__copy">
+          <span class="brand__eyebrow">{{ 'app.eyebrow' | transloco }}</span>
+          <span class="brand__name">{{ 'app.title' | transloco }}</span>
+          <span class="brand__subtitle">{{ 'app.subtitle' | transloco }}</span>
+        </span>
+      </div>
 
-  <div class="dashboard-grid">
-    <section class="hero" aria-live="polite">
-      <app-current-conditions />
-    </section>
+      <div class="topbar__actions">
+        <span class="topbar__status">
+          <mat-icon>{{ forecastState.loading() || locationState.locating() ? 'sync' : 'bolt' }}</mat-icon>
+          {{ forecastState.loading() || locationState.locating() ? ('app.syncing' | transloco) : ('app.live_dashboard' | transloco) }}
+        </span>
+        <button
+          mat-icon-button
+          type="button"
+          [attr.aria-label]="'search.open_tooltip' | transloco"
+          [matTooltip]="'search.open_tooltip' | transloco"
+          (click)="openSearch()"
+        >
+          <mat-icon>search</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          type="button"
+          [attr.aria-label]="'app.refresh' | transloco"
+          [matTooltip]="'app.refresh' | transloco"
+          [disabled]="forecastState.loading() || locationState.locating()"
+          (click)="refresh()"
+        >
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+    </header>
 
-    <section class="overview-section" [attr.aria-label]="t('forecast.title')">
-      <app-forecast-overview />
-    </section>
+    <main>
+      <router-outlet />
+    </main>
+  </mat-sidenav-content>
 
-    <section class="timeline-section" [attr.aria-label]="t('timeline.title')">
-      <app-weather-timeline />
-    </section>
-  </div>
-</main>
+</mat-sidenav-container>
