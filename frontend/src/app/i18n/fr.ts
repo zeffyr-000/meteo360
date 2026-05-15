@@ -1,30 +1,30 @@
 export const frTranslations = {
     app: {
         title: 'Meteo360',
-        dashboard: 'Tableau météo',
-        subtitle: 'Lecture claire du ciel, des températures et du vent pour les prochaines heures.',
-        live_badge: 'Météo live',
-        refresh: 'Actualiser'
+        eyebrow: 'Observation locale',
+        subtitle: 'Prévisions météo en temps réel',
+        refresh: 'Actualiser',
+        live_dashboard: 'Données actives',
+        syncing: 'Synchronisation'
     },
     search: {
         aria_label: 'Recherche météo',
-        panel_label: 'Destination',
-        panel_title: 'Choisir un lieu',
-        city_label: 'Ville',
-        button: 'Rechercher',
+        open_tooltip: 'Rechercher un lieu',
+        open_button: 'Rechercher un lieu',
+        dialog_title: 'Choisir un lieu',
+        subtitle: 'Ville, région ou position actuelle',
+        placeholder: 'Saisir une ville',
+        typing_hint: 'Tape au moins 2 lettres pour voir des suggestions.',
+        no_suggestions: 'Aucun lieu ne correspond.',
+        close: 'Fermer la recherche',
         unavailable: 'La recherche est indisponible pour le moment.',
         no_results: 'Aucun lieu trouvé.'
     },
     location: {
-        panel_label: 'Position',
-        panel_title: 'La météo autour de vous',
         detecting: 'Détection de votre position',
-        detecting_short: 'Localisation',
         detected: 'Position détectée',
         current_name: 'Votre position',
-        current_area: 'Autour de vous',
         button: 'Ma position',
-        button_tooltip: 'Revenir à ma position actuelle',
         unavailable: 'Position indisponible.',
         denied: 'Position non autorisée.',
         timeout: 'Localisation trop lente.',
@@ -35,18 +35,19 @@ export const frTranslations = {
     weather: {
         loading_forecast: 'Chargement des prévisions',
         now: 'Maintenant',
-        context_aria: 'Contexte météo actuel',
+        preview_at: 'Aperçu {{time}}',
+        back_to_live: 'Retour en direct',
         day: 'Jour',
         night: 'Nuit',
         choose_city_title: 'Choisis une ville',
-        choose_city_message: 'Recherche une destination pour afficher la météo actuelle et les prévisions.',
+        choose_city_message: 'Recherche une destination pour afficher la météo et les prévisions.',
         feels_like: 'Ressenti',
         humidity: 'Humidité',
         wind: 'Vent',
         wind_direction: 'Direction',
         rain: 'Pluie',
-        rain_short: 'Pluie',
-        cloud_cover: 'Couverture',
+        cloud_cover: 'Nuages',
+        updated_at: 'Actualisé',
         forecast_unavailable: 'Les prévisions sont indisponibles pour ce lieu.',
         invalid: 'Météo inconnue',
         clear: 'Ciel dégagé',
@@ -57,19 +58,28 @@ export const frTranslations = {
         storm: 'Orage',
         cloudy: 'Nuageux'
     },
-    places: {
-        title: 'Lieux',
-        empty: 'Aucun lieu à afficher'
+    timeline: {
+        title: 'Chronologie',
+        eyebrow: 'Exploration horaire',
+        hint: 'Glisse ou tape pour explorer',
+        empty: 'Aucune prévision',
+        now: 'Maintenant',
+        morning: 'Matin',
+        afternoon: 'Après-midi'
     },
-    hourly: {
-        title: 'Prochaines heures',
-        empty: 'Aucune prévision horaire'
-    },
-    daily: {
-        aria_label: 'Prévisions quotidiennes',
-        eyebrow: 'Cette semaine',
-        title: 'Prévisions quotidiennes',
-        max: 'Max',
-        min: 'Min'
+    forecast: {
+        title: 'Prévisions détaillées',
+        eyebrow: 'Prochaines heures',
+        range_eyebrow: 'Amplitude',
+        trend_title: 'Tendance 12 h',
+        trend_hint: 'Température et pluie heure par heure',
+        trend_aria: 'Tendance météo des prochaines heures',
+        trend_point_aria: '{{time}} : {{temp}} degrés, {{rain}} % de pluie',
+        days_title: '7 jours',
+        days_hint: 'Amplitude, pluie et vent',
+        days_aria: 'Prévisions météo sur sept jours',
+        range_aria: 'Température minimale {{min}} degrés, maximale {{max}} degrés',
+        today: 'Aujourd’hui',
+        empty: 'Les données détaillées ne sont pas encore disponibles.'
     }
 };

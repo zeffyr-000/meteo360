@@ -1,0 +1,137 @@
+<ng-container *transloco="let t">
+  @if (locating()) {
+    <div class="state state--loading">
+      <mat-spinner diameter="32" />
+      <span>{{ t('location.detecting') }}</span>
+    </div>
+  } @else if (loading()) {
+    <div class="state state--loading">
+      <mat-spinner diameter="32" />
+      <span>{{ t('weather.loading_forecast') }}</span>
+    </div>
+  } @else if (current(); as currentWeather) {
+    <article
+      class="current-card"
+      [class.is-night]="currentWeather.is_day === 0"
+      [class.is-rainy]="weatherMood() === 'rainy'"
+      [class.is-storm]="weatherMood() === 'storm'"
+      [class.is-snowy]="weatherMood() === 'snowy'"
+      [class.is-fog]="weatherMood() === 'fog'"
+    >
+      <div class="current-card__atmosphere" aria-hidden="true"></div>
+
+      <header class="hero__header">
+        <div class="hero__moment">
+          @if (isLive()) {
+            <span class="badge badge--live">
+              <span class="badge__dot" aria-hidden="true"></span>
+              {{ t('weather.now') }}
+            </span>
+          } @else {
+            <button mat-stroked-button type="button" class="badge badge--preview"
+              [attr.aria-label]="t('weather.back_to_live')"
+              [matTooltip]="t('weather.back_to_live')"
+              (click)="backToNow()">
+              <mat-icon>schedule</mat-icon>
+              {{ t('weather.preview_at', { time: (displayTime() | date: 'HH:mm') }) }}
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+          <h2 class="hero__place">
+            {{ isCurrentLocation() ? t('location.current_name') : selectedPlace()?.name }}
+          </h2>
+          @if (!isCurrentLocation() && placeMeta()) {
+            <p class="hero__meta">{{ placeMeta() }}</p>
+          }
+        </div>
+
+        <div class="hero__visual" aria-hidden="true">
+          <mat-icon class="hero__icon">{{ icon(weatherCode()) }}</mat-icon>
+        </div>
+      </header>
+
+      <div class="hero__body">
+        <div class="hero__reading">
+          <div class="hero__temp">
+            <span class="hero__temp-value">{{ temperature() | number: '1.0-0' }}</span>
+            <span class="hero__temp-unit">°C</span>
+          </div>
+          <p class="hero__condition">{{ t(labelKey(weatherCode())) }}</p>
+          <div class="hero__chips">
+            @if (displayTime(); as time) {
+              <span class="hero__chip">
+                <mat-icon>schedule</mat-icon>
+                {{ time | date: 'HH:mm' }}
+              </span>
+            }
+            @if (timezone(); as zone) {
+              <span class="hero__chip">
+                <mat-icon>public</mat-icon>
+                {{ zone }}
+              </span>
+            }
+            <span class="hero__chip">
+              <mat-icon>{{ currentWeather.is_day === 1 ? 'wb_sunny' : 'nights_stay' }}</mat-icon>
+              {{ currentWeather.is_day === 1 ? t('weather.day') : t('weather.night') }}
+            </span>
+          </div>
+        </div>
+
+        <div class="metrics">
+          <div class="metric metric--primary">
+            <mat-icon>device_thermostat</mat-icon>
+            <div>
+              <span class="metric__label">{{ t('weather.feels_like') }}</span>
+              @if (isLive()) {
+                <strong>{{ currentWeather.apparent_temperature | number: '1.0-0' }}°C</strong>
+              } @else {
+                <strong>—</strong>
+              }
+            </div>
+          </div>
+          <div class="metric metric--primary">
+            <mat-icon>grain</mat-icon>
+            <div>
+              <span class="metric__label">{{ t('weather.rain') }}</span>
+              <strong>{{ precipitationLabel().value | number: '1.0-1' }} {{ precipitationLabel().unit }}</strong>
+            </div>
+          </div>
+          <div class="metric metric--primary">
+            <mat-icon>air</mat-icon>
+            <div>
+              <span class="metric__label">{{ t('weather.wind') }}</span>
+              <strong>{{ windSpeed() | number: '1.0-0' }} km/h</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      @if (isLive()) {
+        <dl class="meta-list">
+          <div>
+            <dt>{{ t('weather.humidity') }}</dt>
+            <dd>{{ currentWeather.relative_humidity_2m }}%</dd>
+          </div>
+          <div>
+            <dt>{{ t('weather.cloud_cover') }}</dt>
+            <dd>{{ currentWeather.cloud_cover }}%</dd>
+          </div>
+          <div>
+            <dt>{{ t('weather.wind_direction') }}</dt>
+            <dd>{{ currentWeather.wind_direction_10m | number: '1.0-0' }}°</dd>
+          </div>
+          <div>
+            <dt>{{ t('weather.updated_at') }}</dt>
+            <dd>{{ currentWeather.time | date: 'HH:mm' }}</dd>
+          </div>
+        </dl>
+      }
+    </article>
+  } @else {
+    <div class="state state--empty">
+      <mat-icon>wb_cloudy</mat-icon>
+      <h2>{{ t('weather.choose_city_title') }}</h2>
+      <p>{{ t('weather.choose_city_message') }}</p>
+    </div>
+  }
+</ng-container>

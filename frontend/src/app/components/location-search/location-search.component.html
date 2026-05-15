@@ -1,0 +1,86 @@
+<ng-container *transloco="let t">
+  <h2 mat-dialog-title class="location-search__title">
+    <span class="location-search__mark" aria-hidden="true">
+      <mat-icon>travel_explore</mat-icon>
+    </span>
+    <span class="location-search__copy">
+      <span>{{ t('search.dialog_title') }}</span>
+      <small>{{ t('search.subtitle') }}</small>
+    </span>
+    <button
+      mat-icon-button
+      type="button"
+      class="location-search__close"
+      [attr.aria-label]="t('search.close')"
+      (click)="close()"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  </h2>
+
+  <mat-dialog-content class="location-search__body">
+    <div class="location-search__field-shell">
+      <mat-form-field appearance="outline" class="location-search__field" subscriptSizing="dynamic">
+        <mat-label>{{ t('search.placeholder') }}</mat-label>
+        <input
+          matInput
+          type="search"
+          autocomplete="off"
+          cdkFocusInitial
+          [formControl]="searchControl"
+          [matAutocomplete]="auto"
+        />
+        <mat-icon matPrefix>search</mat-icon>
+        @if (status() === 'loading') {
+          <mat-spinner matSuffix diameter="18" />
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayPlace" (optionSelected)="onSelect($event)">
+      @for (place of suggestions(); track place.id) {
+        <mat-option [value]="place">
+          <span class="suggestion">
+            <mat-icon>place</mat-icon>
+            <span class="suggestion__text">
+              <strong>{{ place.name }}</strong>
+              <small>{{ placeMeta(place) }}</small>
+            </span>
+          </span>
+        </mat-option>
+      }
+    </mat-autocomplete>
+
+    @switch (status()) {
+      @case ('hint') {
+        <p class="location-search__notice">
+          <mat-icon>keyboard</mat-icon>
+          {{ t('search.typing_hint') }}
+        </p>
+      }
+      @case ('empty') {
+        <p class="location-search__notice">
+          <mat-icon>search_off</mat-icon>
+          {{ t('search.no_results') }}
+        </p>
+      }
+      @case ('error') {
+        <p class="location-search__notice is-error">
+          <mat-icon>error_outline</mat-icon>
+          {{ t('search.unavailable') }}
+        </p>
+      }
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="location-search__actions" align="end">
+    <button mat-stroked-button type="button" [disabled]="locating()" (click)="detectLocation()">
+      @if (locating()) {
+        <mat-spinner diameter="16" />
+      } @else {
+        <mat-icon>my_location</mat-icon>
+      }
+      {{ t('location.button') }}
+    </button>
+  </mat-dialog-actions>
+</ng-container>

@@ -53,11 +53,21 @@ Current global variables:
   --meteo-ink: #17383b;
   --meteo-muted: #607274;
   --meteo-surface: #f7fbfa;
+  --meteo-surface-card: rgba(255, 255, 255, 0.86);
+  --meteo-surface-raised: rgba(255, 255, 255, 0.96);
   --meteo-teal: #1f7a76;
   --meteo-sun: #d77a39;
+  --meteo-rain: #4597be;
+  --meteo-night: #233a57;
   --meteo-sky: #def4ff;
   --meteo-mint: #e8f7f0;
   --meteo-warm: #fff1dd;
+  --meteo-border: rgba(23, 56, 59, 0.1);
+  --meteo-border-strong: rgba(23, 56, 59, 0.18);
+  --meteo-shadow-soft: 0 14px 32px rgba(23, 56, 59, 0.08);
+  --meteo-shadow-panel: 0 24px 60px rgba(23, 56, 59, 0.12);
+  --meteo-radius-card: 8px;
+  --meteo-radius-panel: 8px;
 }
 ```
 
@@ -66,23 +76,32 @@ Primary uses:
 - `--meteo-ink`: main text color
 - `--meteo-muted`: secondary text and metadata
 - `--meteo-surface`: global page background
+- `--meteo-surface-card`: translucent dashboard panels
+- `--meteo-surface-raised`: raised controls and dialog surfaces
 - `--meteo-teal`: actions, active states, status accents
 - `--meteo-sun`: weather icons and warm accents
+- `--meteo-rain`: precipitation data visualization
+- `--meteo-night`: night and storm panel backgrounds
 - `--meteo-sky`: light atmospheric surfaces
 - `--meteo-mint`: secondary cool surfaces
 - `--meteo-warm`: warm detail surfaces
+- `--meteo-border`: default panel and tile borders
+- `--meteo-border-strong`: emphasized borders and selected states
+- `--meteo-shadow-soft`: small panel elevation
+- `--meteo-shadow-panel`: primary dashboard panel elevation
+- `--meteo-radius-card`: compact cards, controls, and metric tiles
+- `--meteo-radius-panel`: dashboard panels and framed visual areas
 
 ## Angular Material Components In Use
 
 The root dashboard currently imports and uses:
 
 - `MatButtonModule`
-- `MatCardModule`
-- `MatChipsModule`
+- `MatAutocompleteModule`
+- `MatDialogModule`
 - `MatFormFieldModule`
 - `MatIconModule`
 - `MatInputModule`
-- `MatProgressBarModule`
 - `MatProgressSpinnerModule`
 - `MatTooltipModule`
 
@@ -93,8 +112,8 @@ The root dashboard currently imports and uses:
 The main `app-shell` combines a soft atmospheric gradient with subtle overlays. The implementation uses:
 
 - `width: min(1180px, 100%)` for the main content containers
-- desktop shell padding of `28px 24px 38px`
-- mobile shell padding reduced to `20px 16px 28px`
+- desktop shell padding of `28px 28px 46px`
+- mobile shell padding reduced to `12px` to `18px` depending on viewport width
 - layered gradients and textures without flattening the dashboard into a plain surface
 
 ### Cards And Panels
@@ -108,37 +127,39 @@ border-radius: 8px;
 This applies to:
 
 - the brand mark
-- the search panel
+- the search dialog
 - the current weather panel
-- places and hourly panels
+- forecast overview and timeline panels
 - metric cards
 - daily forecast cards
-- place buttons and status pills
+- search suggestion rows and status pills
 
 ### Current Weather Panel
 
 The current weather panel uses:
 
 - a day theme by default
-- a dedicated `.is-night` variant when `current.is_day === 0`
+- dedicated variants for night, rain, storm, snow, and fog states
 - a large weather icon frame
-- Material chips for time, timezone, and day or night state
-- six metric cards for apparent temperature, humidity, wind, rain, cloud cover, and wind direction
+- compact context chips for time, timezone, and day or night state
+- three primary metric cards for apparent temperature, rain, and wind
+- detail tiles for humidity, cloud cover, wind direction, and update time
 
 ### Search And Discovery
 
 The search area is built with:
 
 - `mat-form-field` in `outline` appearance
-- a flat primary action button for search
+- autocomplete suggestions with place metadata
 - a secondary stroked button for current location detection
 - translated tooltip and ARIA labels for icon-only actions
+- typed hint, empty, and error notices with icons
 
 ### Forecast Views
 
-- the places panel uses selectable button rows with an active state and a dedicated current-location variant
-- the hourly panel uses compact cards with `mat-progress-bar` for precipitation probability
-- the daily section uses uniform day cards with paired max and min temperature blocks
+- the forecast overview uses native CSS/HTML bars for 12-hour temperature and precipitation trends
+- the seven-day panel uses temperature range bars plus rain and wind summaries
+- the timeline strip uses selectable cards with condition, temperature, rain probability, and wind speed
 
 ## Responsive Rules
 
@@ -153,7 +174,7 @@ Current breakpoints in `app.scss`:
 
 Behavior by breakpoint:
 
-- under `1050px`, the main content grid collapses to a single column
+- under `1050px`, the main content grid stays single column and the forecast overview panels stack vertically
 - under `760px`, shell padding tightens and metrics move to two columns
 - under `640px`, the top bar stacks vertically and the search form becomes one column
 - under `430px`, metric cards and hourly cards collapse to a single column
@@ -170,7 +191,7 @@ Keep text from overflowing in buttons, cards, and metric values.
 
 ## Weather Icon Mapping
 
-The `App.weatherIcon()` method maps WMO groups to Material icons.
+The `weatherIcon()` utility maps WMO groups to Material icons.
 
 Current groups:
 

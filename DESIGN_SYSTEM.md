@@ -20,11 +20,21 @@ Meteo360 uses a compact design system optimized for reading weather data quickly
   --meteo-ink: #17383b;
   --meteo-muted: #607274;
   --meteo-surface: #f7fbfa;
+  --meteo-surface-card: rgba(255, 255, 255, 0.86);
+  --meteo-surface-raised: rgba(255, 255, 255, 0.96);
   --meteo-teal: #1f7a76;
   --meteo-sun: #d77a39;
+  --meteo-rain: #4597be;
+  --meteo-night: #233a57;
   --meteo-sky: #def4ff;
   --meteo-mint: #e8f7f0;
   --meteo-warm: #fff1dd;
+  --meteo-border: rgba(23, 56, 59, 0.1);
+  --meteo-border-strong: rgba(23, 56, 59, 0.18);
+  --meteo-shadow-soft: 0 14px 32px rgba(23, 56, 59, 0.08);
+  --meteo-shadow-panel: 0 24px 60px rgba(23, 56, 59, 0.12);
+  --meteo-radius-card: 8px;
+  --meteo-radius-panel: 8px;
 }
 ```
 
@@ -33,11 +43,21 @@ Meteo360 uses a compact design system optimized for reading weather data quickly
 | `--meteo-ink` | primary text |
 | `--meteo-muted` | secondary text and metadata |
 | `--meteo-surface` | page background |
+| `--meteo-surface-card` | translucent dashboard panels |
+| `--meteo-surface-raised` | raised controls and dialog surfaces |
 | `--meteo-teal` | actions, status, active states |
 | `--meteo-sun` | warm weather accents and icons |
+| `--meteo-rain` | precipitation data visualization |
+| `--meteo-night` | night and storm panel backgrounds |
 | `--meteo-sky` | cool atmospheric surfaces |
 | `--meteo-mint` | supportive secondary surfaces |
 | `--meteo-warm` | warm supporting surfaces |
+| `--meteo-border` | default panel and tile borders |
+| `--meteo-border-strong` | emphasized borders and selected states |
+| `--meteo-shadow-soft` | small panel elevation |
+| `--meteo-shadow-panel` | primary dashboard panel elevation |
+| `--meteo-radius-card` | compact cards, controls, and metric tiles |
+| `--meteo-radius-panel` | dashboard panels and framed visual areas |
 
 Material palette choices:
 
@@ -77,11 +97,11 @@ margin: 0 auto;
 
 Common spacing values in the current UI:
 
-- shell padding: `28px 24px 38px`
-- mobile shell padding: `20px 16px 28px`
-- main content grid gap: `16px`
-- metrics grid gap: `12px`
-- place list gap: `8px`
+- shell padding: `28px 28px 46px`
+- mobile shell padding: `12px` to `18px` depending on viewport width
+- main content grid gap: `14px` to `18px`
+- metrics grid gap: `8px`
+- timeline card gap: `10px`
 - daily grid gap: `10px`
 
 ## Visual Structure
@@ -94,17 +114,25 @@ The top bar contains:
 - the product eyebrow and dashboard title
 - a short subtitle
 - a live status pill
-- a refresh icon button with translated tooltip and ARIA label
+- search and refresh icon buttons with translated tooltips and ARIA labels
 
-### Search Panel
+### Search Dialog
 
-The search panel combines:
+The search dialog combines:
 
-- explanatory copy on the left
+- a compact atmospheric header with an icon mark
 - an outlined Material search field
-- a primary search button
-- a secondary current-location button
-- translated location notices and error messages beneath the form
+- autocomplete suggestions with place metadata
+- typed hint, empty, and error notices
+- a secondary current-location action
+
+### Dashboard Shell
+
+The root dashboard renders:
+
+- the current weather hero panel
+- the forecast overview panels for the next hours and seven days
+- the exploratory timeline strip
 
 ### Current Weather Panel
 
@@ -114,35 +142,31 @@ The hero panel shows:
 - the current temperature
 - a translated weather label
 - a mapped weather icon inside a framed visual block
-- Material chips for time, timezone, and day or night state
-- six metric cards for key weather indicators
+- compact context chips for time, timezone, and day or night state
+- three primary metric tiles for apparent temperature, rain, and wind
+- detail tiles for humidity, cloud cover, wind direction, and update time
 
-The panel supports a dark night-mode variant when the forecast reports `is_day === 0`.
+The panel supports variants for night, rain, storm, snow, and fog states based on the active forecast hour.
 
-### Places Panel
+### Forecast Overview
 
-The places panel renders selectable place rows. The active row must remain obvious through both border and background changes, not color alone.
+The forecast overview uses two compact panels:
 
-### Hourly Panel
+- a 12-hour trend panel with native CSS/HTML bars for temperature and precipitation
+- a seven-day panel with temperature range bars plus rain and wind summaries
 
-The hourly panel renders a compact card strip with:
+This view is built from the existing `hourlyPreview` and `dailyPreview` signals and does not require a charting dependency.
+
+### Timeline Panel
+
+The timeline panel renders a compact card strip with:
 
 - time
 - weather icon
+- translated weather condition
 - temperature
 - precipitation probability
-- `mat-progress-bar`
 - wind speed
-
-### Daily Cards
-
-Each daily card shows:
-
-- localized date
-- translated weather condition label
-- weather icon
-- max and min temperatures in paired blocks
-- rain and wind summary values
 
 ## Background And Atmosphere
 
@@ -166,7 +190,7 @@ Key breakpoints:
 Current responsive rules:
 
 - the main content grid collapses to one column under `1050px`
-- the search panel becomes one column under `760px`
+- the forecast overview collapses to one column under `1050px`
 - the top bar stacks vertically under `640px`
 - metric cards and hourly items become single-column under `430px`
 - daily cards also collapse to one column on smaller screens
