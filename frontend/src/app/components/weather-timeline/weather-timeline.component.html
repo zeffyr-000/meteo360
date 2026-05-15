@@ -1,0 +1,65 @@
+<ng-container *transloco="let t">
+  <header class="timeline__head">
+    <div>
+      <span class="timeline__eyebrow">{{ t('timeline.eyebrow') }}</span>
+      <h3>{{ t('timeline.title') }}</h3>
+    </div>
+    <span class="timeline__hint">{{ t('timeline.hint') }}</span>
+  </header>
+
+  @if (slots().length > 0) {
+    <div class="timeline__strip" role="list">
+      @for (slot of slots(); track slotKey(slot)) {
+        <button
+          type="button"
+          role="listitem"
+          class="slot"
+          [class.is-now]="slot.kind === 'now'"
+          [class.is-selected]="isSelected(slot)"
+          [class.is-future-day]="!slot.isToday"
+          [attr.data-slot-key]="slotKey(slot)"
+          (click)="select(slot)"
+        >
+          @if (primaryLabelKey(slot); as labelKey) {
+            <span class="slot__label">{{ t(labelKey) }}</span>
+          } @else if (slot.isToday) {
+            <span class="slot__label slot__label--time">{{ slot.time | date: 'HH' }}h</span>
+          } @else {
+            <span class="slot__label">{{ slot.time | date: 'EEE' }}</span>
+          }
+
+          <span class="slot__date">
+            @if (slot.kind === 'now') {
+              {{ slot.time | date: 'HH:mm' }}
+            } @else {
+              {{ slot.time | date: 'd MMM' }}
+            }
+          </span>
+
+          <mat-icon class="slot__icon">{{ icon(slot.weatherCode) }}</mat-icon>
+
+          <span class="slot__condition">{{ t(labelKey(slot.weatherCode)) }}</span>
+
+          <span class="slot__temp">
+            <strong>{{ slot.temperature | number: '1.0-0' }}°</strong>
+            @if (!slot.isToday && slot.dailyMin !== null) {
+              <small>{{ slot.dailyMin | number: '1.0-0' }}°</small>
+            }
+          </span>
+
+          <span class="slot__rain" [class.has-rain]="slot.precipitationProbability >= 30">
+            <mat-icon>water_drop</mat-icon>
+            {{ slot.precipitationProbability }}%
+          </span>
+
+          <span class="slot__wind">
+            <mat-icon>air</mat-icon>
+            {{ slot.windSpeed | number: '1.0-0' }}
+          </span>
+        </button>
+      }
+    </div>
+  } @else {
+    <p class="timeline__empty">{{ t('timeline.empty') }}</p>
+  }
+</ng-container>

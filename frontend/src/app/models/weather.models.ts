@@ -80,3 +80,18 @@ export interface DailyPreview {
     windSpeed: number;
     weatherCode: number;
 }
+
+export type TimelineSlotKind = 'now' | 'hour' | 'morning' | 'afternoon' | 'midday';
+
+export interface TimelineSlot {
+    hourIndex: number;
+    kind: TimelineSlotKind;
+    time: string;
+    isToday: boolean;
+    temperature: number;
+    dailyMax: number | null;
+    dailyMin: number | null;
+    precipitationProbability: number;
+    windSpeed: number;
+    weatherCode: number;
+}
