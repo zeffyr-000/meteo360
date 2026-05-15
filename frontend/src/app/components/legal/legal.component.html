@@ -1,0 +1,154 @@
+<article class="legal-page" itemscope itemtype="https://schema.org/AboutPage">
+
+  <header class="legal-header">
+    <mat-icon class="header-icon" aria-hidden="true">gavel</mat-icon>
+    <h1 itemprop="name">{{ 'legal.title' | transloco }}</h1>
+    <p class="legal-subtitle" itemprop="description">{{ 'legal.subtitle' | transloco }}</p>
+  </header>
+
+  <div class="legal-content">
+
+    <!-- À propos du projet -->
+    <section class="legal-section" aria-labelledby="about-title">
+      <mat-card appearance="outlined" class="legal-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-icon">info</mat-icon>
+          <mat-card-title id="about-title">{{ 'legal.about_title' | transloco }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ 'legal.about_description' | transloco }}</p>
+          <p>{{ 'legal.about_purpose' | transloco }}</p>
+          <ul class="tech-list" [attr.aria-label]="'legal.tech_label' | transloco">
+            <li><mat-icon aria-hidden="true">web</mat-icon><span>Angular 21</span></li>
+            <li><mat-icon aria-hidden="true">palette</mat-icon><span>Material Design 3</span></li>
+            <li><mat-icon aria-hidden="true">speed</mat-icon><span>Signals &amp; OnPush</span></li>
+            <li><mat-icon aria-hidden="true">storage</mat-icon><span>Jelix 1.7 / PHP</span></li>
+            <li><mat-icon aria-hidden="true">cloud</mat-icon><span>Open-Meteo</span></li>
+            <li><mat-icon aria-hidden="true">science</mat-icon><span>Vitest</span></li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Points forts -->
+    <section class="legal-section" aria-labelledby="highlights-title">
+      <mat-card appearance="outlined" class="legal-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-icon">star</mat-icon>
+          <mat-card-title id="highlights-title">{{ 'legal.highlights_title' | transloco }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="highlights-grid">
+            <div class="highlight-item">
+              <mat-icon aria-hidden="true">bolt</mat-icon>
+              <div>
+                <strong>{{ 'legal.highlight_signals' | transloco }}</strong>
+                <p>{{ 'legal.highlight_signals_desc' | transloco }}</p>
+              </div>
+            </div>
+            <mat-divider />
+            <div class="highlight-item">
+              <mat-icon aria-hidden="true">widgets</mat-icon>
+              <div>
+                <strong>{{ 'legal.highlight_standalone' | transloco }}</strong>
+                <p>{{ 'legal.highlight_standalone_desc' | transloco }}</p>
+              </div>
+            </div>
+            <mat-divider />
+            <div class="highlight-item">
+              <mat-icon aria-hidden="true">cloud</mat-icon>
+              <div>
+                <strong>{{ 'legal.highlight_open_meteo' | transloco }}</strong>
+                <p>{{ 'legal.highlight_open_meteo_desc' | transloco }}</p>
+              </div>
+            </div>
+            <mat-divider />
+            <div class="highlight-item">
+              <mat-icon aria-hidden="true">science</mat-icon>
+              <div>
+                <strong>{{ 'legal.highlight_tests' | transloco }}</strong>
+                <p>{{ 'legal.highlight_tests_desc' | transloco }}</p>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Auteur -->
+    <section class="legal-section" aria-labelledby="author-title">
+      <mat-card appearance="outlined" class="legal-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-icon">person</mat-icon>
+          <mat-card-title id="author-title">{{ 'legal.author_title' | transloco }}</mat-card-title>
+          <mat-card-subtitle>{{ 'legal.author_name' | transloco }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="author-role">{{ 'legal.author_role' | transloco }}</p>
+          <div class="author-links">
+            <a
+              [href]="authorGithub"
+              target="_blank"
+              rel="noopener noreferrer"
+              mat-stroked-button
+              class="author-link"
+            >
+              <mat-icon>code</mat-icon>
+              {{ 'legal.author_github_label' | transloco }}
+            </a>
+            <a
+              [href]="projectRepo"
+              target="_blank"
+              rel="noopener noreferrer"
+              mat-stroked-button
+              class="author-link"
+            >
+              <mat-icon>source</mat-icon>
+              {{ 'legal.author_repo_label' | transloco }}
+            </a>
+          </div>
+          <p class="link-description">{{ 'legal.author_github_desc' | transloco }}</p>
+          <p class="link-description">{{ 'legal.author_repo_desc' | transloco }}</p>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Avertissement -->
+    <section class="legal-section" aria-labelledby="disclaimer-title">
+      <mat-card appearance="outlined" class="legal-card warning-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-icon warning-icon">warning</mat-icon>
+          <mat-card-title id="disclaimer-title">{{ 'legal.disclaimer_title' | transloco }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ 'legal.disclaimer_not_production' | transloco }}</p>
+          <mat-divider />
+          <p>{{ 'legal.disclaimer_may_change' | transloco }}</p>
+          <mat-divider />
+          <p class="recommendation">
+            <mat-icon aria-hidden="true">lightbulb</mat-icon>
+            <span>{{ 'legal.disclaimer_recommendation' | transloco }}</span>
+          </p>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+    <!-- Données -->
+    <section class="legal-section" aria-labelledby="data-title">
+      <mat-card appearance="outlined" class="legal-card">
+        <mat-card-header>
+          <mat-icon mat-card-avatar class="card-icon">cloud_download</mat-icon>
+          <mat-card-title id="data-title">{{ 'legal.data_title' | transloco }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <p>{{ 'legal.data_description' | transloco }}</p>
+          <p class="data-attribution">
+            <a [href]="openMeteoUrl" target="_blank" rel="noopener noreferrer">open-meteo.com</a>
+             — {{ 'legal.data_attribution' | transloco }}
+          </p>
+        </mat-card-content>
+      </mat-card>
+    </section>
+
+  </div>
+</article>

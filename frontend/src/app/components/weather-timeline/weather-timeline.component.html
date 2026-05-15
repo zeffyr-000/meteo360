@@ -1,10 +1,9 @@
-<ng-container *transloco="let t">
   <header class="timeline__head">
     <div>
-      <span class="timeline__eyebrow">{{ t('timeline.eyebrow') }}</span>
-      <h3>{{ t('timeline.title') }}</h3>
+      <span class="timeline__eyebrow">{{ 'timeline.eyebrow' | transloco }}</span>
+      <h3>{{ 'timeline.title' | transloco }}</h3>
     </div>
-    <span class="timeline__hint">{{ t('timeline.hint') }}</span>
+    <span class="timeline__hint">{{ 'timeline.hint' | transloco }}</span>
   </header>
 
   @if (slots().length > 0) {
@@ -21,7 +20,7 @@
           (click)="select(slot)"
         >
           @if (primaryLabelKey(slot); as labelKey) {
-            <span class="slot__label">{{ t(labelKey) }}</span>
+            <span class="slot__label">{{ labelKey | transloco }}</span>
           } @else if (slot.isToday) {
             <span class="slot__label slot__label--time">{{ slot.time | date: 'HH' }}h</span>
           } @else {
@@ -38,7 +37,7 @@
 
           <mat-icon class="slot__icon">{{ icon(slot.weatherCode) }}</mat-icon>
 
-          <span class="slot__condition">{{ t(labelKey(slot.weatherCode)) }}</span>
+          <span class="slot__condition">{{ labelKey(slot.weatherCode) | transloco }}</span>
 
           <span class="slot__temp">
             <strong>{{ slot.temperature | number: '1.0-0' }}°</strong>
@@ -60,6 +59,5 @@
       }
     </div>
   } @else {
-    <p class="timeline__empty">{{ t('timeline.empty') }}</p>
+    <p class="timeline__empty">{{ 'timeline.empty' | transloco }}</p>
   }
-</ng-container>

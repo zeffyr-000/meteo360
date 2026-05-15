@@ -2,21 +2,34 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { vi } from 'vitest';
 
-import { App } from './app';
-import { WeatherForecast } from './models/weather.models';
-import { WeatherService } from './services/weather.service';
-import { getTranslocoTestingModule } from './testing/transloco-testing.module';
+import { DashboardComponent } from './dashboard.component';
+import { WeatherPlace, WeatherForecast } from '../../models/weather.models';
+import { WeatherService } from '../../services/weather.service';
+import { ForecastStateService } from '../../state/forecast-state.service';
+import { LocationStateService } from '../../state/location-state.service';
+import { getTranslocoTestingModule } from '../../testing/transloco-testing.module';
 
-describe('App', () => {
+describe('DashboardComponent', () => {
     const weatherServiceMock = {
         searchPlaces: vi.fn(),
         getForecast: vi.fn()
     };
+
+    function createPlace(): WeatherPlace {
+        return {
+            id: 1,
+            name: 'Lyon',
+            admin1: 'Rhône-Alpes',
+            country: 'France',
+            latitude: 45,
+            longitude: 4,
+            timezone: 'Europe/Paris'
+        };
+    }
 
     function createForecast(): WeatherForecast {
         return {
@@ -47,7 +60,7 @@ describe('App', () => {
 
         await TestBed.configureTestingModule({
             imports: [
-                App,
+                DashboardComponent,
                 // eslint-disable-next-line @typescript-eslint/no-deprecated
                 NoopAnimationsModule,
                 getTranslocoTestingModule()
@@ -63,15 +76,17 @@ describe('App', () => {
 
     afterEach(() => vi.clearAllMocks());
 
-    it('opens the search dialog when openSearch is invoked', () => {
-        const fixture = TestBed.createComponent(App);
-        const dialog = TestBed.inject(MatDialog);
-        const dialogRef = { afterClosed: () => of(null) } as unknown as MatDialogRef<unknown, unknown>;
-        const openSpy = vi.spyOn(dialog, 'open').mockReturnValue(dialogRef as never);
-
+    it('loads forecast automatically when a place is selected', () => {
+        const fixture = TestBed.createComponent(DashboardComponent);
         fixture.detectChanges();
-        (fixture.componentInstance as unknown as { openSearch: () => void }).openSearch();
 
-        expect(openSpy).toHaveBeenCalled();
+        const locationState = TestBed.inject(LocationStateService);
+        const forecastState = TestBed.inject(ForecastStateService);
+
+        locationState.selectPlace(createPlace());
+        fixture.detectChanges();
+
+        expect(weatherServiceMock.getForecast).toHaveBeenCalledWith(45, 4);
+        expect(forecastState.forecast()).not.toBeNull();
     });
 });

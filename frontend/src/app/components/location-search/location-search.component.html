@@ -1,17 +1,16 @@
-<ng-container *transloco="let t">
   <h2 mat-dialog-title class="location-search__title">
     <span class="location-search__mark" aria-hidden="true">
       <mat-icon>travel_explore</mat-icon>
     </span>
     <span class="location-search__copy">
-      <span>{{ t('search.dialog_title') }}</span>
-      <small>{{ t('search.subtitle') }}</small>
+      <span>{{ 'search.dialog_title' | transloco }}</span>
+      <small>{{ 'search.subtitle' | transloco }}</small>
     </span>
     <button
       mat-icon-button
       type="button"
       class="location-search__close"
-      [attr.aria-label]="t('search.close')"
+      [attr.aria-label]="'search.close' | transloco"
       (click)="close()"
     >
       <mat-icon>close</mat-icon>
@@ -21,7 +20,7 @@
   <mat-dialog-content class="location-search__body">
     <div class="location-search__field-shell">
       <mat-form-field appearance="outline" class="location-search__field" subscriptSizing="dynamic">
-        <mat-label>{{ t('search.placeholder') }}</mat-label>
+        <mat-label>{{ 'search.placeholder' | transloco }}</mat-label>
         <input
           matInput
           type="search"
@@ -55,19 +54,19 @@
       @case ('hint') {
         <p class="location-search__notice">
           <mat-icon>keyboard</mat-icon>
-          {{ t('search.typing_hint') }}
+          {{ 'search.typing_hint' | transloco }}
         </p>
       }
       @case ('empty') {
         <p class="location-search__notice">
           <mat-icon>search_off</mat-icon>
-          {{ t('search.no_results') }}
+          {{ 'search.no_results' | transloco }}
         </p>
       }
       @case ('error') {
         <p class="location-search__notice is-error">
           <mat-icon>error_outline</mat-icon>
-          {{ t('search.unavailable') }}
+          {{ 'search.unavailable' | transloco }}
         </p>
       }
     }
@@ -80,7 +79,6 @@
       } @else {
         <mat-icon>my_location</mat-icon>
       }
-      {{ t('location.button') }}
+      {{ 'location.button' | transloco }}
     </button>
   </mat-dialog-actions>
-</ng-container>
