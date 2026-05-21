@@ -3,7 +3,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { TranslocoModule } from '@jsverse/transloco';
 
 import { CurrentConditionsComponent } from '../current-conditions/current-conditions.component';
-import { ForecastOverviewComponent } from '../forecast-overview/forecast-overview.component';
 import { WeatherTimelineComponent } from '../weather-timeline/weather-timeline.component';
 import { ForecastStateService } from '../../state/forecast-state.service';
 import { LocationStateService } from '../../state/location-state.service';
@@ -14,7 +13,6 @@ import { LocationStateService } from '../../state/location-state.service';
     MatIconModule,
     TranslocoModule,
     CurrentConditionsComponent,
-    ForecastOverviewComponent,
     WeatherTimelineComponent
   ],
   templateUrl: './dashboard.component.html',

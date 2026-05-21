@@ -114,7 +114,7 @@ Open-Meteo
 
 - Prefer Angular Material components over custom controls.
 - Preserve the Meteo360 dashboard character: operational, dense, and readable.
-- Reuse the existing token system and 8px radius language.
+- Reuse the existing token system and brutalist radius tokens (`--meteo-radius-block` 2px, `--meteo-radius-card` 4px, `--meteo-radius-panel` 6px, `--meteo-radius-pill` 999px).
 - Preserve mobile behavior and prevent text overflow in controls and cards.
 
 ### 6. Jelix Backend Rules

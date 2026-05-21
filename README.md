@@ -17,8 +17,7 @@ Production URL: [https://meteo360.zeffyr.com/](https://meteo360.zeffyr.com/)
 
 - Place search powered by Open-Meteo geocoding
 - Current weather for the selected location
-- Hourly forecast preview for the next hours
-- Seven-day forecast preview
+- Central exploration timeline grouping today's hours and the next few days with a mini temperature curve
 - Responsive dashboard layout built with Angular Material
 - Relative `/api` routing in development and production
 - Canonical production redirects to `https://meteo360.zeffyr.com/`

@@ -36,6 +36,7 @@ describe('DashboardComponent', () => {
             latitude: 45,
             longitude: 4,
             timezone: 'Europe/Paris',
+            utc_offset_seconds: 7200,
             current: {
                 time: '2026-05-15T12:00',
                 temperature_2m: 22,

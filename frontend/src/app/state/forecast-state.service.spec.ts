@@ -19,6 +19,7 @@ describe('ForecastStateService', () => {
             latitude: 0,
             longitude: 0,
             timezone: 'UTC',
+            utc_offset_seconds: 0,
             current: {
                 time: currentTime,
                 temperature_2m: 20,

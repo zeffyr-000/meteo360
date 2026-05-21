@@ -6,15 +6,60 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { TranslocoModule } from '@jsverse/transloco';
 
+import { RollingNumberComponent } from '../rolling-number/rolling-number.component';
+import { WeatherGlyphComponent, type WeatherGlyph } from '../weather-glyph/weather-glyph.component';
 import { ForecastStateService } from '../../state/forecast-state.service';
 import { LocationStateService } from '../../state/location-state.service';
-import { weatherIcon, weatherLabelKey } from '../../utils/weather-code.util';
+import { WeatherDaily } from '../../models/weather.models';
+import { weatherLabelKey } from '../../utils/weather-code.util';
+import { windCardinal } from '../../utils/wind-cardinal.util';
 
 type WeatherMood = 'clear' | 'variable' | 'fog' | 'rainy' | 'snowy' | 'storm' | 'cloudy';
 
+interface UvSummary {
+  value: number;
+  levelKey: string;
+}
+
+interface SunArc {
+  mode: 'day';
+  sunrise: Date;
+  sunset: Date;
+  progress: number;
+  dayLengthH: number;
+  dayLengthM: number;
+}
+
+interface SunNight {
+  mode: 'night';
+  nextSunrise: Date | null;
+  /** True when the next sunrise is still today (pre-dawn); false when it is tomorrow (post-sunset). */
+  nextSunriseIsToday: boolean;
+}
+
+type SunData = SunArc | SunNight;
+
+/** Converts an Open-Meteo place-local ISO string ("YYYY-MM-DDTHH:mm") into a UTC Date
+ * using the place's UTC offset. All Open-Meteo local-time strings must be parsed this way
+ * to avoid browser-timezone contamination when comparing sunrise/sunset/current times.
+ */
+function localIsoToDate(iso: string, utcOffsetSeconds: number): Date {
+  return new Date(new Date(iso + 'Z').getTime() - utcOffsetSeconds * 1000);
+}
+
 @Component({
   selector: 'app-current-conditions',
-  imports: [DatePipe, DecimalPipe, MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule, TranslocoModule],
+  imports: [
+    DatePipe,
+    DecimalPipe,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatTooltipModule,
+    TranslocoModule,
+    RollingNumberComponent,
+    WeatherGlyphComponent
+  ],
   templateUrl: './current-conditions.component.html',
   styleUrl: './current-conditions.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -31,7 +76,27 @@ export class CurrentConditionsComponent {
   protected readonly isCurrentLocation = this.locationState.isCurrentLocation;
   protected readonly placeMeta = this.locationState.placeMeta;
   protected readonly locating = this.locationState.locating;
-  protected readonly timezone = computed(() => this.forecastState.forecast()?.timezone ?? this.selectedPlace()?.timezone ?? null);
+  protected readonly timezone = computed(
+    () => this.forecastState.forecast()?.timezone ?? this.selectedPlace()?.timezone ?? null
+  );
+  private readonly utcOffset = computed<number | null>(
+    () => this.forecastState.forecast()?.utc_offset_seconds ?? null
+  );
+
+  /** Daily payload (raw arrays from Open-Meteo). */
+  private readonly daily = computed<WeatherDaily | null>(() => this.forecastState.forecast()?.daily ?? null);
+
+  /** Index of the displayed day inside the daily payload. In preview mode uses the selected hour's date. */
+  private readonly todayDailyIndex = computed<number>(() => {
+    const daily = this.daily();
+    if (!daily || daily.time.length === 0) {
+      return -1;
+    }
+    const reference = this.displayTime() ?? this.current()?.time ?? new Date().toISOString();
+    const day = reference.slice(0, 10);
+    const index = daily.time.findIndex((d) => d.startsWith(day));
+    return index >= 0 ? index : 0;
+  });
 
   protected readonly weatherCode = computed(() => {
     if (this.isLive()) {
@@ -54,20 +119,130 @@ export class CurrentConditionsComponent {
     return this.selectedHour()?.time ?? null;
   });
 
-  protected readonly precipitationLabel = computed(() => {
-    if (this.isLive()) {
-      const value = this.current()?.precipitation ?? 0;
-      return { value, unit: 'mm', precise: true };
+  /** Converts an Open-Meteo local-time ISO string to a proper UTC Date for use with DatePipe + timezone. */
+  protected toLocalDate(iso: string): Date {
+    const offset = this.utcOffset();
+    return offset !== null ? localIsoToDate(iso, offset) : new Date(iso);
+  }
+
+  protected readonly feelsLike = computed<number | null>(() => {
+    if (!this.isLive()) {
+      return null;
     }
-    const value = this.selectedHour()?.precipitationProbability ?? 0;
-    return { value, unit: '%', precise: false };
+    return this.current()?.apparent_temperature ?? null;
   });
 
-  protected readonly windSpeed = computed(() => {
+  protected readonly dailyRange = computed<{ min: number; max: number } | null>(() => {
+    const daily = this.daily();
+    const i = this.todayDailyIndex();
+    if (!daily || i < 0) {
+      return null;
+    }
+    const min = daily.temperature_2m_min[i];
+    const max = daily.temperature_2m_max[i];
+    if (min === undefined || max === undefined) {
+      return null;
+    }
+    return { min, max };
+  });
+
+  protected readonly windSpeed = computed<number | null>(() => {
     if (this.isLive()) {
       return this.current()?.wind_speed_10m ?? null;
     }
     return this.selectedHour()?.windSpeed ?? null;
+  });
+
+  protected readonly windDirection = computed<number | null>(() => {
+    if (!this.isLive()) return null;
+    return this.current()?.wind_direction_10m ?? null;
+  });
+
+  protected readonly windCardinalLabel = computed(() => windCardinal(this.windDirection()));
+
+  protected readonly windGusts = computed<number | null>(() => {
+    const daily = this.daily();
+    const i = this.todayDailyIndex();
+    if (!daily || i < 0) {
+      return null;
+    }
+    return daily.wind_gusts_10m_max?.[i] ?? null;
+  });
+
+  protected readonly humidity = computed<number | null>(() => {
+    if (!this.isLive()) return null;
+    return this.current()?.relative_humidity_2m ?? null;
+  });
+
+  protected readonly uv = computed<UvSummary | null>(() => {
+    const daily = this.daily();
+    const i = this.todayDailyIndex();
+    const raw = daily?.uv_index_max?.[i];
+    if (raw === undefined || raw === null) {
+      return null;
+    }
+    const rounded = Math.round(raw);
+    let levelKey = 'weather.uv_level_low';
+    if (rounded >= 11) {
+      levelKey = 'weather.uv_level_extreme';
+    } else if (rounded >= 8) {
+      levelKey = 'weather.uv_level_very_high';
+    } else if (rounded >= 6) {
+      levelKey = 'weather.uv_level_high';
+    } else if (rounded >= 3) {
+      levelKey = 'weather.uv_level_moderate';
+    }
+    return { value: rounded, levelKey };
+  });
+
+  protected readonly precip24h = computed<number | null>(() => {
+    const daily = this.daily();
+    const i = this.todayDailyIndex();
+    if (!daily || i < 0) {
+      return null;
+    }
+    return daily.precipitation_sum[i] ?? null;
+  });
+
+  protected readonly sunData = computed<SunData | null>(() => {
+    const daily = this.daily();
+    const i = this.todayDailyIndex();
+    if (!daily || i < 0 || !daily.sunrise || !daily.sunset) {
+      return null;
+    }
+    const sunriseIso = daily.sunrise[i];
+    const sunsetIso = daily.sunset[i];
+    if (!sunriseIso || !sunsetIso) {
+      return null;
+    }
+    const utcOffset = this.utcOffset();
+    const toDate = (iso: string): Date =>
+      utcOffset !== null ? localIsoToDate(iso, utcOffset) : new Date(iso);
+    const sunrise = toDate(sunriseIso);
+    const sunset = toDate(sunsetIso);
+    const referenceIso = this.displayTime() ?? this.current()?.time ?? null;
+    const now = referenceIso ? toDate(referenceIso) : new Date();
+    if (now >= sunrise && now <= sunset) {
+      const total = sunset.getTime() - sunrise.getTime();
+      const elapsed = now.getTime() - sunrise.getTime();
+      const progress = total > 0 ? Math.max(0, Math.min(1, elapsed / total)) : 0;
+      const dayLengthMin = Math.round(total / 60000);
+      return {
+        mode: 'day',
+        sunrise,
+        sunset,
+        progress,
+        dayLengthH: Math.floor(dayLengthMin / 60),
+        dayLengthM: dayLengthMin % 60
+      };
+    }
+    const isPreDawn = now < sunrise;
+    const nextIso = isPreDawn ? daily.sunrise[i] : (daily.sunrise[i + 1] ?? null);
+    return {
+      mode: 'night',
+      nextSunrise: nextIso ? toDate(nextIso) : null,
+      nextSunriseIsToday: isPreDawn
+    };
   });
 
   protected readonly weatherMood = computed<WeatherMood>(() => {
@@ -89,15 +264,35 @@ export class CurrentConditionsComponent {
     }
   });
 
+  /** Resolves the in-house SVG glyph that replaces Material icons in the headline. */
+  protected readonly weatherGlyph = computed<WeatherGlyph>(() => {
+    const mood = this.weatherMood();
+    const isDay = this.isLive() ? this.current()?.is_day !== 0 : null;
+    switch (mood) {
+      case 'clear':
+        return isDay === false ? 'moon' : 'sun';
+      case 'variable':
+        return isDay === false ? 'cloud' : 'partly-cloudy';
+      case 'cloudy':
+        return 'cloud';
+      case 'fog':
+        return 'fog';
+      case 'rainy':
+        return 'rain';
+      case 'snowy':
+        return 'snow';
+      case 'storm':
+        return 'storm';
+      default:
+        return 'cloud';
+    }
+  });
+
   protected backToNow(): void {
     this.forecastState.resetToNow();
   }
 
   protected labelKey(code: number | undefined): string {
     return weatherLabelKey(code);
-  }
-
-  protected icon(code: number | undefined): string {
-    return weatherIcon(code);
   }
 }

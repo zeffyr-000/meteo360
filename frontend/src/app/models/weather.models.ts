@@ -42,12 +42,17 @@ export interface WeatherDaily {
     temperature_2m_min: number[];
     precipitation_sum: number[];
     wind_speed_10m_max: number[];
+    wind_gusts_10m_max?: number[];
+    uv_index_max?: number[];
+    sunrise?: string[];
+    sunset?: string[];
 }
 
 export interface WeatherForecast {
     latitude: number;
     longitude: number;
     timezone: string | null;
+    utc_offset_seconds: number | null;
     current: WeatherCurrent | null;
     hourly: WeatherHourly | null;
     daily: WeatherDaily | null;

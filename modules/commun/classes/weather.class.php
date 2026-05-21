@@ -52,7 +52,7 @@ class weather
             'longitude' => $longitude,
             'current' => 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m',
             'hourly' => 'temperature_2m,precipitation_probability,weather_code,wind_speed_10m',
-            'daily' => 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max',
+            'daily' => 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,uv_index_max,sunrise,sunset',
             'timezone' => 'auto',
             'forecast_days' => 7
         ));
@@ -61,6 +61,7 @@ class weather
             'latitude' => $data['latitude'] ?? $latitude,
             'longitude' => $data['longitude'] ?? $longitude,
             'timezone' => $data['timezone'] ?? null,
+            'utc_offset_seconds' => isset($data['utc_offset_seconds']) ? (int) $data['utc_offset_seconds'] : null,
             'current' => $data['current'] ?? null,
             'hourly' => $data['hourly'] ?? null,
             'daily' => $data['daily'] ?? null,

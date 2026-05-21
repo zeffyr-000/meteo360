@@ -131,7 +131,6 @@ The search dialog combines:
 The root dashboard renders:
 
 - the current weather hero panel
-- the forecast overview panels for the next hours and seven days
 - the exploratory timeline strip
 
 ### Current Weather Panel
@@ -148,25 +147,16 @@ The hero panel shows:
 
 The panel supports variants for night, rain, storm, snow, and fog states based on the active forecast hour.
 
-### Forecast Overview
-
-The forecast overview uses two compact panels:
-
-- a 12-hour trend panel with native CSS/HTML bars for temperature and precipitation
-- a seven-day panel with temperature range bars plus rain and wind summaries
-
-This view is built from the existing `hourlyPreview` and `dailyPreview` signals and does not require a charting dependency.
-
 ### Timeline Panel
 
-The timeline panel renders a compact card strip with:
+The timeline panel is the central forecast surface. It renders:
 
-- time
-- weather icon
-- translated weather condition
-- temperature
-- precipitation probability
-- wind speed
+- per-day groups (today, tomorrow, then weekday + date) with a visible separator between groups
+- a mini temperature curve drawn as an SVG overlay aligned on slot centers
+- desktop scroll chevrons (hidden under `760px` in favor of touch scrolling)
+- slot cards exposing time, weather icon, translated condition, temperature, precipitation probability, and wind speed
+
+The selected slot is auto-centered in the strip. The `now` and selected states use the brutalist filled variants of the slot card.
 
 ## Background And Atmosphere
 
@@ -184,16 +174,15 @@ Key breakpoints:
 
 - `1050px`
 - `760px`
-- `640px`
+- `600px`
 - `430px`
 
 Current responsive rules:
 
-- the main content grid collapses to one column under `1050px`
-- the forecast overview collapses to one column under `1050px`
-- the top bar stacks vertically under `640px`
+- the dashboard grid keeps its single column stack (hero then timeline)
+- under `760px`, shell padding tightens, masthead secondary elements (eyebrow, rule, status) are hidden while the single-row layout is preserved, hero stacks to one column, metrics move to two columns and timeline chevrons are hidden in favor of touch scrolling
 - metric cards and hourly items become single-column under `430px`
-- daily cards also collapse to one column on smaller screens
+- timeline chevrons are hidden under `760px` in favor of touch scrolling
 
 Keep button labels, place names, and metric values from overflowing on narrow screens.
 

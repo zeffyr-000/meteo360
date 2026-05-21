@@ -1,41 +1,115 @@
 @use '@angular/material' as mat;
 
+// ─── Fonts ───────────────────────────────────────────────────────────────────
+// Body : Roboto (Material default)
+// Display editorial serif : Fraunces (warm, atmospheric)
+// Signature brutalist grotesque : Space Grotesk (numerals, labels, eyebrows)
+
 @import '@fontsource/roboto/300.css';
 @import '@fontsource/roboto/400.css';
 @import '@fontsource/roboto/500.css';
 @import '@fontsource/roboto/700.css';
-@import 'material-icons/iconfont/material-icons.css';
+
+@import '@fontsource/fraunces/400.css';
+@import '@fontsource/fraunces/500.css';
+@import '@fontsource/fraunces/600.css';
+@import '@fontsource/fraunces/700.css';
+@import '@fontsource/fraunces/900.css';
+
+@import '@fontsource/space-grotesk/400.css';
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/space-grotesk/700.css';
+
+@import 'material-symbols/sharp.css';
+
+// ─── Design tokens ───────────────────────────────────────────────────────────
 
 :root {
-  --meteo-ink: #17383b;
-  --meteo-muted: #607274;
-  --meteo-surface: #f7fbfa;
-  --meteo-surface-card: rgba(255, 255, 255, 0.86);
-  --meteo-surface-raised: rgba(255, 255, 255, 0.96);
-  --meteo-teal: #1f7a76;
-  --meteo-sun: #d77a39;
-  --meteo-rain: #4597be;
-  --meteo-night: #233a57;
-  --meteo-sky: #def4ff;
-  --meteo-mint: #e8f7f0;
-  --meteo-warm: #fff1dd;
-  --meteo-border: rgba(23, 56, 59, 0.1);
-  --meteo-border-strong: rgba(23, 56, 59, 0.18);
-  --meteo-shadow-soft: 0 14px 32px rgba(23, 56, 59, 0.08);
-  --meteo-shadow-panel: 0 24px 60px rgba(23, 56, 59, 0.12);
-  --meteo-radius-card: 8px;
-  --meteo-radius-panel: 8px;
+  // Brand identity — deep ink + sodium yellow signature
+  --brand-ink: #0e1b2c;
+  --brand-ink-soft: #1c2f47;
+  --brand-paper: #f4efe6;
+  --brand-paper-warm: #ece4d3;
+  --brand-signal: #f4c430; // sodium yellow signature
+  --brand-signal-deep: #d9a800;
+  --brand-rouge: #e63946;
+  --brand-azure: #4597be;
+
+  // Legacy meteo tokens — preserved for backward compatibility while migrating.
+  // They are remapped onto the new brand palette so old components stay coherent.
+  --meteo-ink: var(--brand-ink);
+  --meteo-muted: #5a6b80;
+  --meteo-surface: var(--brand-paper);
+  --meteo-surface-card: rgba(255, 255, 255, 0.92);
+  --meteo-surface-raised: #ffffff;
+  --meteo-teal: var(--brand-ink);
+  --meteo-sun: var(--brand-signal-deep);
+  --meteo-rain: var(--brand-azure);
+  --meteo-night: var(--brand-ink);
+  --meteo-sky: #d4e7f2;
+  --meteo-mint: #e6efe8;
+  --meteo-warm: #f7e6c4;
+  --meteo-border: rgba(14, 27, 44, 0.14);
+  --meteo-border-strong: var(--brand-ink);
+  --meteo-shadow-soft: 0 2px 0 0 var(--brand-ink);
+  --meteo-shadow-panel: 0 4px 0 0 var(--brand-ink);
+
+  // Shape language — brutalist edges + editorial cards + pills
+  --meteo-radius-block: 2px;
+  --meteo-radius-card: 4px;
+  --meteo-radius-panel: 6px;
+  --meteo-radius-pill: 999px;
+
+  // Borders — affirmed thickness for the neo-brutalist signature
+  --brand-border-w: 1.5px;
+  --brand-border-w-strong: 2.5px;
+
+  // Typography scale
+  --font-display: 'Fraunces', 'Times New Roman', serif;
+  --font-grotesk: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
+  --font-body: 'Roboto', system-ui, sans-serif;
+
+  --type-display-xxl: clamp(4.5rem, 14vw, 10rem);
+  --type-display-xl: clamp(3rem, 8vw, 6rem);
+  --type-display-l: clamp(2rem, 5vw, 3.5rem);
+  --type-headline: clamp(1.5rem, 3vw, 2.25rem);
+  --type-eyebrow: 0.72rem;
+
+  // Motion tokens
+  --scene-duration: 800ms;
+  --scene-easing: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ui-duration: 180ms;
+  --ui-easing: cubic-bezier(0.2, 0, 0, 1);
+
+  // ─── Scene palette (default = clear-day) ───────────────────────────────────
+  --scene-sky-top: #f6c976;
+  --scene-sky-mid: #f4efe6;
+  --scene-sky-bot: #e9d8b8;
+  --scene-fg: var(--brand-ink);
+  --scene-fg-muted: #4a5566;
+  --scene-accent: var(--brand-signal-deep);
+  --scene-paper: #f4efe6;
+  --scene-surface: #f7f2e9;
+  --scene-surface-soft: #efe8d8;
+  --scene-rule: rgba(14, 27, 44, 0.32);
+  --scene-glow: rgba(244, 196, 48, 0.32);
+  --scene-grain-opacity: 0.06;
 }
 
+// ─── Scene variants ──────────────────────────────────────────────────────────
+// Historical names kept (--scene-fg, --scene-surface, etc.) so existing
+// components do not need a rename pass. Only one preset now (defined in :root).
+
+// ─── Material 21 theme ────────────────────────────────────────────────────────
 html {
   @include mat.theme((
     color: (
       primary: mat.$azure-palette,
-      tertiary: mat.$orange-palette
+      tertiary: mat.$yellow-palette
     ),
     typography: (
       plain-family: 'Roboto',
-      brand-family: 'Roboto'
+      brand-family: 'Fraunces'
     ),
     density: (
       scale: 0
@@ -43,6 +117,7 @@ html {
   ));
 }
 
+// ─── Base ────────────────────────────────────────────────────────────────────
 html,
 body {
   min-height: 100%;
@@ -50,22 +125,45 @@ body {
 }
 
 body {
-  background: var(--meteo-surface);
-  font-family: Roboto, Arial, sans-serif;
+  background: var(--brand-paper);
+  color: var(--brand-ink);
+  font-family: var(--font-body);
+
+  // Subtle paper grain across the whole app
+  background-image:
+    radial-gradient(circle at 12% 20%, rgba(14, 27, 44, 0.04), transparent 38%),
+    radial-gradient(circle at 88% 80%, rgba(244, 196, 48, 0.06), transparent 42%);
 }
 
 * {
   box-sizing: border-box;
 }
 
+// ─── Reduced motion ──────────────────────────────────────────────────────────
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+// ─── Selection ───────────────────────────────────────────────────────────────
+::selection {
+  background: var(--brand-signal);
+  color: var(--brand-ink);
+}
+
+// ─── Material overrides (dialogs, autocomplete, tooltip) ─────────────────────
 .location-search-dialog {
   .mat-mdc-dialog-surface {
     overflow: hidden;
     padding: 0;
-    border-radius: 18px;
-    box-shadow:
-      0 24px 48px -16px rgba(23, 56, 59, 0.32),
-      0 8px 16px -8px rgba(23, 56, 59, 0.18);
+    border: var(--brand-border-w-strong) solid var(--brand-ink);
+    border-radius: var(--meteo-radius-card);
+    box-shadow: 8px 8px 0 0 var(--brand-ink);
   }
 }
 
@@ -74,8 +172,38 @@ body {
 }
 
 .mat-mdc-autocomplete-panel {
-  border-radius: 12px !important;
-  box-shadow:
-    0 18px 36px -12px rgba(23, 56, 59, 0.28),
-    0 6px 12px -6px rgba(23, 56, 59, 0.14) !important;
+  border: var(--brand-border-w) solid var(--brand-ink) !important;
+  border-radius: var(--meteo-radius-card) !important;
+  box-shadow: 4px 4px 0 0 var(--brand-ink) !important;
+}
+
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  background: var(--brand-ink) !important;
+  color: var(--brand-paper) !important;
+  border-radius: var(--meteo-radius-block) !important;
+  font-family: var(--font-grotesk) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+}
+
+.mat-mdc-icon-button.mat-mdc-button-base:focus-visible {
+  outline: var(--brand-border-w-strong) solid var(--brand-signal);
+  outline-offset: 2px;
+}
+
+// ─── Material Symbols Sharp : unified iconography ───────────────────────────
+// Override the default mat-icon font (Material Icons filled) with Symbols Sharp
+// + variation axes for a heavier, more graphic brutalist look.
+.mat-icon,
+mat-icon,
+.material-icons,
+.material-symbols-sharp {
+  font-family: 'Material Symbols Sharp', 'Material Icons', sans-serif !important;
+  font-weight: normal;
+  font-style: normal;
+  font-variation-settings: 'FILL' 1, 'wght' 600, 'GRAD' 0, 'opsz' 24;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  -webkit-font-feature-settings: 'liga';
+  font-feature-settings: 'liga';
 }
