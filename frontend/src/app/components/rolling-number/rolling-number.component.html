@@ -1,0 +1,6 @@
+@for (cell of cells(); track cell.posFromRight) {
+  <span class="rolling-number__cell" [class.is-changed]="cell.changed">
+    <span class="rolling-number__char rolling-number__char--out">{{ cell.prev }}</span>
+    <span class="rolling-number__char rolling-number__char--in">{{ cell.now }}</span>
+  </span>
+}

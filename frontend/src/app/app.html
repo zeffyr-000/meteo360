@@ -6,9 +6,7 @@
     (openedChange)="menuOpen.set($event)"
   >
     <div class="sidenav-brand">
-      <span class="sidenav-brand__mark" aria-hidden="true">
-        <mat-icon>cloud</mat-icon>
-      </span>
+      <span class="sidenav-brand__mark" aria-hidden="true">M360</span>
       <span class="sidenav-brand__name">{{ 'app.title' | transloco }}</span>
     </div>
 
@@ -38,8 +36,9 @@
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <header class="app-toolbar">
+    <header class="masthead">
       <button
+        class="masthead__menu"
         mat-icon-button
         type="button"
         [attr.aria-label]="menuOpen() ? ('nav.close_menu' | transloco) : ('nav.open_menu' | transloco)"
@@ -49,23 +48,26 @@
         <mat-icon>menu</mat-icon>
       </button>
 
-      <div class="brand">
-        <span class="brand__mark" aria-hidden="true">
-          <mat-icon>cloud</mat-icon>
-        </span>
-        <span class="brand__copy">
-          <span class="brand__eyebrow">{{ 'app.eyebrow' | transloco }}</span>
-          <span class="brand__name">{{ 'app.title' | transloco }}</span>
-          <span class="brand__subtitle">{{ 'app.subtitle' | transloco }}</span>
+      <div class="masthead__brand">
+        <span class="masthead__mark" aria-hidden="true">M360</span>
+        <span class="masthead__copy">
+          <span class="masthead__eyebrow">{{ 'app.eyebrow' | transloco }}</span>
+          <span class="masthead__name">{{ 'app.title' | transloco }}</span>
         </span>
       </div>
 
-      <div class="topbar__actions">
-        <span class="topbar__status">
-          <mat-icon>{{ forecastState.loading() || locationState.locating() ? 'sync' : 'bolt' }}</mat-icon>
+      <div class="masthead__rule" aria-hidden="true"></div>
+
+      <div class="masthead__actions">
+        <span
+          class="masthead__status"
+          [class.is-syncing]="forecastState.loading() || locationState.locating()"
+        >
+          <span class="masthead__status-dot" aria-hidden="true"></span>
           {{ forecastState.loading() || locationState.locating() ? ('app.syncing' | transloco) : ('app.live_dashboard' | transloco) }}
         </span>
         <button
+          class="masthead__icon-btn"
           mat-icon-button
           type="button"
           [attr.aria-label]="'search.open_tooltip' | transloco"
@@ -75,6 +77,7 @@
           <mat-icon>search</mat-icon>
         </button>
         <button
+          class="masthead__icon-btn"
           mat-icon-button
           type="button"
           [attr.aria-label]="'app.refresh' | transloco"
@@ -87,7 +90,7 @@
       </div>
     </header>
 
-    <main>
+    <main class="stage">
       <router-outlet />
     </main>
   </mat-sidenav-content>

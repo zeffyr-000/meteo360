@@ -1,64 +1,100 @@
 :host {
-	display: block;
+  display: block;
 }
 
 .not-found-page {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	min-height: calc(100vh - 57px);
-	padding: 32px 18px;
-	background:
-		linear-gradient(170deg, rgba(222, 244, 255, 0.9) 0%, rgba(244, 253, 247, 0.98) 55%, rgba(255, 243, 226, 0.88) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 120px);
+  padding: 32px 18px;
 }
 
 .not-found-content {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 12px;
-	text-align: center;
-	max-width: 420px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  max-width: 520px;
+  padding: 32px;
+  background: var(--scene-surface);
+  color: var(--scene-fg);
+  border: var(--brand-border-w-strong) solid var(--scene-fg);
+  border-radius: var(--meteo-radius-panel);
+  box-shadow: 8px 8px 0 0 var(--scene-fg);
+  text-align: left;
+  transition:
+    background var(--scene-duration) var(--scene-easing),
+    color var(--scene-duration) var(--scene-easing),
+    border-color var(--scene-duration) var(--scene-easing),
+    box-shadow var(--scene-duration) var(--scene-easing);
 }
 
 .not-found-icon {
-	width: 80px;
-	height: 80px;
-	font-size: 80px;
-	color: var(--meteo-teal);
-	opacity: 0.4;
-	margin-bottom: 8px;
+  width: 56px;
+  height: 56px;
+  font-size: 56px;
+  color: var(--brand-ink);
+  margin-bottom: 4px;
 }
 
 .not-found-title {
-	margin: 0;
-	font-size: clamp(3rem, 10vw, 5rem);
-	font-weight: 900;
-	line-height: 1;
-	color: var(--meteo-ink);
-	letter-spacing: -0.02em;
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(4rem, 14vw, 8rem);
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 0.85;
+  color: var(--brand-ink);
 }
 
 .not-found-subtitle {
-	margin: 0;
-	font-size: 1.25rem;
-	font-weight: 700;
-	color: var(--meteo-ink);
+  margin: 0;
+  font-family: var(--font-grotesk);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--brand-ink);
 }
 
 .not-found-message {
-	margin: 0;
-	color: var(--meteo-muted);
-	font-size: 0.95rem;
-	line-height: 1.6;
+  margin: 0;
+  font-family: var(--font-grotesk);
+  font-size: 0.95rem;
+  font-weight: 500;
+  line-height: 1.6;
+  color: rgba(14, 27, 44, 0.72);
 }
 
 .back-button {
-	margin-top: 16px;
-	background-color: var(--meteo-teal) !important;
-	color: #fff !important;
-	border-radius: var(--meteo-radius-card);
-	display: inline-flex;
-	align-items: center;
-	gap: 6px;
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 18px;
+  background: var(--brand-ink) !important;
+  color: var(--brand-signal) !important;
+  font-family: var(--font-grotesk) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.12em !important;
+  text-transform: uppercase !important;
+  border: var(--brand-border-w-strong) solid var(--brand-ink) !important;
+  border-radius: var(--meteo-radius-block) !important;
+  transition:
+    transform var(--ui-duration) var(--ui-easing),
+    box-shadow var(--ui-duration) var(--ui-easing);
+
+  &:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 0 var(--brand-signal);
+  }
+}
+
+@media (max-width: 430px) {
+  .not-found-content {
+    padding: 24px 22px;
+    box-shadow: 5px 5px 0 0 var(--brand-ink);
+  }
 }

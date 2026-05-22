@@ -129,9 +129,8 @@ This applies to:
 - the brand mark
 - the search dialog
 - the current weather panel
-- forecast overview and timeline panels
+- the timeline panel
 - metric cards
-- daily forecast cards
 - search suggestion rows and status pills
 
 ### Current Weather Panel
@@ -157,26 +156,25 @@ The search area is built with:
 
 ### Forecast Views
 
-- the forecast overview uses native CSS/HTML bars for 12-hour temperature and precipitation trends
-- the seven-day panel uses temperature range bars plus rain and wind summaries
-- the timeline strip uses selectable cards with condition, temperature, rain probability, and wind speed
+- the timeline panel is the central forecast surface: per-day groups, scroll chevrons on desktop, and a mini temperature curve drawn as an SVG overlay
+- timeline slots are selectable cards exposing condition, temperature, rain probability, and wind speed
 
 ## Responsive Rules
 
-Current breakpoints in `app.scss`:
+Current breakpoints across component SCSS files (`dashboard.component.scss`, `current-conditions.component.scss`, etc.):
 
 ```scss
 @media (max-width: 1050px) { ... }
 @media (max-width: 760px) { ... }
-@media (max-width: 640px) { ... }
+@media (max-width: 600px) { ... }
 @media (max-width: 430px) { ... }
 ```
 
 Behavior by breakpoint:
 
-- under `1050px`, the main content grid stays single column and the forecast overview panels stack vertically
-- under `760px`, shell padding tightens and metrics move to two columns
-- under `640px`, the top bar stacks vertically and the search form becomes one column
+- under `1050px`, the dashboard grid keeps its single column stack (hero then timeline)
+- under `760px`, shell padding tightens, masthead secondary elements (eyebrow, rule, status) are hidden while the single-row layout is preserved, hero stacks to one column, metrics move to two columns and timeline chevrons are hidden in favor of touch scrolling
+- under `600px`, dashboard shell gap tightens further
 - under `430px`, metric cards and hourly cards collapse to a single column
 
 Keep text from overflowing in buttons, cards, and metric values.

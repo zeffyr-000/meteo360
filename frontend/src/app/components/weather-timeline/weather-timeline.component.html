@@ -1,63 +1,125 @@
-  <header class="timeline__head">
-    <div>
-      <span class="timeline__eyebrow">{{ 'timeline.eyebrow' | transloco }}</span>
-      <h3>{{ 'timeline.title' | transloco }}</h3>
-    </div>
-    <span class="timeline__hint">{{ 'timeline.hint' | transloco }}</span>
-  </header>
+<header class="timeline__head">
+  <div>
+    <span class="timeline__eyebrow">{{ 'timeline.eyebrow' | transloco }}</span>
+    <h3>{{ 'timeline.title' | transloco }}</h3>
+  </div>
+  <span class="timeline__hint">{{ 'timeline.hint' | transloco }}</span>
+</header>
 
-  @if (slots().length > 0) {
-    <div class="timeline__strip" role="list">
-      @for (slot of slots(); track slotKey(slot)) {
-        <button
-          type="button"
-          role="listitem"
-          class="slot"
-          [class.is-now]="slot.kind === 'now'"
-          [class.is-selected]="isSelected(slot)"
-          [class.is-future-day]="!slot.isToday"
-          [attr.data-slot-key]="slotKey(slot)"
-          (click)="select(slot)"
+@if (slots().length > 0) {
+  <div class="timeline__viewport">
+    <button
+      type="button"
+      mat-icon-button
+      class="timeline__chevron timeline__chevron--prev"
+      [attr.aria-label]="'timeline.scroll_prev' | transloco"
+      [matTooltip]="'timeline.scroll_prev' | transloco"
+      [disabled]="!canScrollPrev()"
+      (click)="scrollPrev()"
+    >
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <div class="timeline__strip" (scroll)="onStripScroll()">
+      <div class="timeline__track">
+        <svg
+          class="timeline__curve"
+          aria-hidden="true"
+          preserveAspectRatio="none"
+          [attr.viewBox]="curveViewBox()"
+          [style.width.px]="curveWidth()"
+          [style.height.px]="curveHeight"
         >
-          @if (primaryLabelKey(slot); as labelKey) {
-            <span class="slot__label">{{ labelKey | transloco }}</span>
-          } @else if (slot.isToday) {
-            <span class="slot__label slot__label--time">{{ slot.time | date: 'HH' }}h</span>
-          } @else {
-            <span class="slot__label">{{ slot.time | date: 'EEE' }}</span>
-          }
+          <defs>
+            <linearGradient id="timeline-curve-fill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="var(--brand-signal)" stop-opacity="0.5" />
+              <stop offset="100%" stop-color="var(--brand-signal)" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+          <path class="timeline__curve-area" [attr.d]="curveAreaPath()" fill="url(#timeline-curve-fill)" />
+          <path class="timeline__curve-line" [attr.d]="curvePath()" fill="none" />
+        </svg>
 
-          <span class="slot__date">
-            @if (slot.kind === 'now') {
-              {{ slot.time | date: 'HH:mm' }}
-            } @else {
-              {{ slot.time | date: 'd MMM' }}
-            }
-          </span>
+        @for (group of groupedSlots(); track groupKey(group)) {
+          <div
+            class="group"
+            role="group"
+            [attr.aria-label]="'timeline.day_group_aria' | transloco: {
+              label: group.labelKey ? (group.labelKey | transloco) : (toLocalDate(group.time) | date: 'EEEE d MMMM' : (timezone() ?? undefined))
+            }"
+          >
+            <header class="group__head">
+              @if (group.labelKey; as labelKey) {
+                <strong class="group__label">{{ labelKey | transloco }}</strong>
+                <small class="group__date">{{ toLocalDate(group.time) | date: 'EEE d MMM' : (timezone() ?? undefined) }}</small>
+              } @else {
+                <strong class="group__label">{{ toLocalDate(group.time) | date: 'EEE' : (timezone() ?? undefined) }}</strong>
+                <small class="group__date">{{ toLocalDate(group.time) | date: 'd MMM' : (timezone() ?? undefined) }}</small>
+              }
+            </header>
 
-          <mat-icon class="slot__icon">{{ icon(slot.weatherCode) }}</mat-icon>
+            <ul class="group__slots">
+              @for (slot of group.slots; track slotKey(slot)) {
+                <li>
+                  <button
+                    type="button"
+                    class="slot"
+                    [class.is-now]="slot.kind === 'now'"
+                    [class.is-selected]="isSelected(slot)"
+                    [class.is-future-day]="!slot.isToday"
+                    [attr.data-slot-key]="slotKey(slot)"
+                    (click)="select(slot)"
+                  >
+                    @if (primaryLabelKey(slot); as labelKey) {
+                      <span class="slot__label">{{ labelKey | transloco }}</span>
+                    } @else {
+                      <span class="slot__label slot__label--time">{{ toLocalDate(slot.time) | date: 'HH' : (timezone() ?? undefined) }}h</span>
+                    }
 
-          <span class="slot__condition">{{ labelKey(slot.weatherCode) | transloco }}</span>
+                    <span class="slot__date">{{ toLocalDate(slot.time) | date: 'HH:mm' : (timezone() ?? undefined) }}</span>
 
-          <span class="slot__temp">
-            <strong>{{ slot.temperature | number: '1.0-0' }}°</strong>
-            @if (!slot.isToday && slot.dailyMin !== null) {
-              <small>{{ slot.dailyMin | number: '1.0-0' }}°</small>
-            }
-          </span>
+                    <mat-icon class="slot__icon">{{ icon(slot.weatherCode) }}</mat-icon>
 
-          <span class="slot__rain" [class.has-rain]="slot.precipitationProbability >= 30">
-            <mat-icon>water_drop</mat-icon>
-            {{ slot.precipitationProbability }}%
-          </span>
+                    <span class="slot__condition">{{ labelKey(slot.weatherCode) | transloco }}</span>
 
-          <span class="slot__wind">
-            <mat-icon>air</mat-icon>
-            {{ slot.windSpeed | number: '1.0-0' }}
-          </span>
-        </button>
-      }
+                    <span class="slot__temp">
+                      <strong>{{ slot.temperature | number: '1.0-0' }}°</strong>
+                      @if (!slot.isToday && slot.dailyMin !== null) {
+                        <small>{{ slot.dailyMin | number: '1.0-0' }}°</small>
+                      }
+                    </span>
+
+                    <span class="slot__rain" [class.has-rain]="slot.precipitationProbability >= 30">
+                      <mat-icon>water_drop</mat-icon>
+                      {{ slot.precipitationProbability }}%
+                    </span>
+
+                    <span class="slot__wind">
+                      <mat-icon>air</mat-icon>
+                      {{ slot.windSpeed | number: '1.0-0' }}
+                    </span>
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+      </div>
     </div>
-  } @else {
-    <p class="timeline__empty">{{ 'timeline.empty' | transloco }}</p>
-  }
+
+    <button
+      type="button"
+      mat-icon-button
+      class="timeline__chevron timeline__chevron--next"
+      [attr.aria-label]="'timeline.scroll_next' | transloco"
+      [matTooltip]="'timeline.scroll_next' | transloco"
+      [disabled]="!canScrollNext()"
+      (click)="scrollNext()"
+    >
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+} @else {
+  <p class="timeline__empty">{{ 'timeline.empty' | transloco }}</p>
+}
+

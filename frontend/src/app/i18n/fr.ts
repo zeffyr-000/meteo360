@@ -56,16 +56,56 @@ export const frTranslations = {
         rainy: 'Pluie',
         snowy: 'Neige',
         storm: 'Orage',
-        cloudy: 'Nuageux'
+        cloudy: 'Nuageux',
+        uv_level_low: 'Faible',
+        uv_level_moderate: 'Modéré',
+        uv_level_high: 'Élevé',
+        uv_level_very_high: 'Très élevé',
+        uv_level_extreme: 'Extrême',
+        cardinal: {
+            N: 'N',
+            NE: 'NE',
+            E: 'E',
+            SE: 'SE',
+            S: 'S',
+            SW: 'SO',
+            W: 'O',
+            NW: 'NO'
+        }
+    },
+    current: {
+        now: 'Maintenant',
+        preview: 'Aperçu',
+        back_to_now: 'Revenir au direct',
+        place_eyebrow: 'Lieu sélectionné',
+        no_place: 'Aucun lieu',
+        empty: 'Sélectionne un lieu pour afficher la météo.',
+        feels_like: 'Ressenti',
+        daily_range: 'Min · Max',
+        metrics_aria: 'Indicateurs météo du moment',
+        uv_label: 'UV',
+        wind_gusts: 'Rafales',
+        precipitation_24h: 'Pluie 24 h',
+        sun_progress_aria: 'Course du soleil',
+        day_length: 'Durée du jour',
+        night: 'Nuit',
+        next_sunrise: 'Lever du soleil',
+        tomorrow_sunrise: 'Lever demain',
+        temp_unavailable: 'Température indisponible'
     },
     timeline: {
         title: 'Chronologie',
         eyebrow: 'Exploration horaire',
-        hint: 'Glisse ou tape pour explorer',
+        hint: 'Glisse, défile ou tape pour explorer',
         empty: 'Aucune prévision',
         now: 'Maintenant',
         morning: 'Matin',
-        afternoon: 'Après-midi'
+        afternoon: 'Après-midi',
+        today: 'Aujourd’hui',
+        tomorrow: 'Demain',
+        scroll_prev: 'Reculer dans la chronologie',
+        scroll_next: 'Avancer dans la chronologie',
+        day_group_aria: 'Créneaux du {{label}}'
     },
     nav: {
         home: 'Météo',
@@ -109,20 +149,5 @@ export const frTranslations = {
         subtitle: 'Page introuvable',
         message: 'La page que vous recherchez n\'existe pas ou a été déplacée.',
         back: 'Retour à la météo'
-    },
-    forecast: {
-        title: 'Prévisions détaillées',
-        eyebrow: 'Prochaines heures',
-        range_eyebrow: 'Amplitude',
-        trend_title: 'Tendance 12 h',
-        trend_hint: 'Température et pluie heure par heure',
-        trend_aria: 'Tendance météo des prochaines heures',
-        trend_point_aria: '{{time}} : {{temp}} degrés, {{rain}} % de pluie',
-        days_title: '7 jours',
-        days_hint: 'Amplitude, pluie et vent',
-        days_aria: 'Prévisions météo sur sept jours',
-        range_aria: 'Température minimale {{min}} degrés, maximale {{max}} degrés',
-        today: 'Aujourd’hui',
-        empty: 'Les données détaillées ne sont pas encore disponibles.'
     }
 };

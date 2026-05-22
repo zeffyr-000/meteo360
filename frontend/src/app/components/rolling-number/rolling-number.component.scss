@@ -1,0 +1,67 @@
+:host {
+  display: inline-flex;
+  font-variant-numeric: tabular-nums lining-nums;
+  line-height: 1;
+}
+
+.rolling-number__cell {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  // Reserve width per character to stop layout shift on digit changes.
+  min-width: 0.55em;
+  text-align: center;
+}
+
+.rolling-number__char {
+  display: inline-block;
+  line-height: inherit;
+  transition: transform 420ms cubic-bezier(0.65, 0.05, 0.36, 1), opacity 320ms ease;
+  will-change: transform, opacity;
+}
+
+.rolling-number__char--in {
+  position: relative;
+}
+
+.rolling-number__char--out {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  transform: translateY(0);
+  opacity: 0;
+}
+
+// When the digit changed, slide the new one up from below
+// and let the previous one briefly slide out the top.
+.is-changed .rolling-number__char--in {
+  animation: rolling-in 420ms cubic-bezier(0.65, 0.05, 0.36, 1) both;
+}
+
+.is-changed .rolling-number__char--out {
+  animation: rolling-out 360ms cubic-bezier(0.65, 0.05, 0.36, 1) both;
+}
+
+@keyframes rolling-in {
+  0%   { transform: translateY(100%); opacity: 0; }
+  60%  { opacity: 1; }
+  100% { transform: translateY(0);    opacity: 1; }
+}
+
+@keyframes rolling-out {
+  0%   { transform: translateY(0);     opacity: 1; }
+  100% { transform: translateY(-100%); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rolling-number__char,
+  .is-changed .rolling-number__char--in,
+  .is-changed .rolling-number__char--out {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .rolling-number__char--out {
+    display: none;
+  }
+}

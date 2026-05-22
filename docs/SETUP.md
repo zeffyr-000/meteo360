@@ -28,8 +28,21 @@ Install dependencies and start the Angular dev server from `frontend/`:
 
 ```bash
 cd /Users/sparkman/www/meteo360/frontend
-npm install
+npm ci
 npm start
+```
+
+Use `npm ci` for the initial install and after every `git pull`: it is deterministic, honours `package-lock.json` strictly, and is significantly faster than `npm install`. Reserve `npm install <pkg>` for explicitly adding or upgrading a dependency.
+
+The repository ships a `frontend/.nvmrc` pinning Node 22. With `nvm` or `fnm` installed, run `nvm use` (or `fnm use`) from `frontend/` to align your local Node version with that pinned version.
+
+If `npm install` ever hangs or fails with `EACCES` / `EINTEGRITY` errors, the npm cache is usually the culprit. Reset it without `sudo`:
+
+```bash
+npm cache clean --force
+npm cache verify
+rm -rf node_modules
+npm ci --no-audit --no-fund
 ```
 
 The dev server runs on:
