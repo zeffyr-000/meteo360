@@ -70,7 +70,14 @@ Do not remove that allowance unless the MessageFormat dependency is replaced.
 
 ## Fonts And Icons
 
-Roboto is bundled locally through `@fontsource/roboto` and Material icons through the `material-icons` package. This avoids an external font CDN dependency during runtime.
+Fonts and icons are bundled locally. The current visual system imports:
+
+- Roboto via `@fontsource/roboto` for body text and Material defaults
+- Fraunces via `@fontsource/fraunces` for editorial display text
+- Space Grotesk via `@fontsource/space-grotesk` for labels, compact metadata, and numerals
+- Material Symbols Sharp via `material-symbols` for iconography
+
+This avoids runtime font CDN dependencies, but the extra display and icon assets must be treated as part of the bundle budget. Before adding new font families or weights, measure the production build and remove unused imports where possible.
 
 ## Frontend Runtime Patterns
 
@@ -82,8 +89,23 @@ The current frontend implementation uses several low-overhead patterns:
 - `takeUntilDestroyed()` for subscription cleanup
 - request ID guards to ignore stale place-search and forecast responses
 - `withFetch()` for the Angular `HttpClient` backend
+- reduced-motion handling for global CSS animations and transitions
+- scroll behavior that respects `prefers-reduced-motion` in the forecast timeline
 
 Presentation logic should stay derived from canonical state instead of duplicating large payloads.
+
+## Motion And Rendering Guardrails
+
+The current UI includes custom motion for weather period changes, rolling numbers, hover feedback, and timeline scrolling. Keep these rules in place:
+
+- animate `transform` and `opacity` first
+- avoid animating layout properties such as width, height, top, left, margin, or padding
+- use `will-change` only on elements that are actively animating or proven to need it
+- keep large scene transitions on `--scene-duration` and small UI feedback on `--ui-duration`
+- preserve the global reduced-motion override in `frontend/src/styles.scss`
+- measure before optimizing timeline DOM work or SVG path generation
+
+Timeline DOM measurement in `WeatherTimelineComponent` should stay scoped to the rendered strip, slot elements, and resize observer. If future changes make the strip fight user scrolling, add a small guard such as a last-centered slot key before introducing broader state machinery.
 
 ## Backend Guardrails
 
@@ -103,6 +125,8 @@ Keeping provider calls on the backend preserves a stable frontend contract and c
 
 Evaluate only if the MVP grows beyond its current scope:
 
+- audit imported Fraunces and Space Grotesk weights after production builds
+- measure Material Symbols Sharp cost before adding another icon package
 - short-lived backend cache for place lookups
 - short-lived backend cache for forecasts by coordinates
 - lazy loading if the app grows into multiple routed pages

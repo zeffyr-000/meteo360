@@ -41,9 +41,14 @@ export class ForecastStateService {
     return hourly.time.map((time, index) => ({
       time,
       temperature: hourly.temperature_2m[index],
+      apparentTemperature: hourly.apparent_temperature?.[index] ?? null,
+      humidity: hourly.relative_humidity_2m?.[index] ?? null,
       precipitationProbability: hourly.precipitation_probability[index],
       windSpeed: hourly.wind_speed_10m[index],
-      weatherCode: hourly.weather_code[index]
+      windDirection: hourly.wind_direction_10m?.[index] ?? null,
+      windGusts: hourly.wind_gusts_10m?.[index] ?? null,
+      weatherCode: hourly.weather_code[index],
+      uvIndex: hourly.uv_index?.[index] ?? null
     }));
   });
 

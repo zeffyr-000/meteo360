@@ -50,9 +50,9 @@ class weather
         $data = $this->getJson(self::FORECAST_URL, array(
             'latitude' => $latitude,
             'longitude' => $longitude,
-            'current' => 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m',
-            'hourly' => 'temperature_2m,precipitation_probability,weather_code,wind_speed_10m',
-            'daily' => 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,uv_index_max,sunrise,sunset',
+            'current' => 'temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m',
+            'hourly' => 'temperature_2m,apparent_temperature,relative_humidity_2m,precipitation_probability,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m,uv_index',
+            'daily' => 'weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum,wind_speed_10m_max,sunrise,sunset',
             'timezone' => 'auto',
             'forecast_days' => 7
         ));

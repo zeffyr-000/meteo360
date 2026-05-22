@@ -150,7 +150,7 @@
       }
 
       @if (uv(); as u) {
-        <article class="tile">
+        <article class="tile tile--uv">
           <header class="tile__header">
             <mat-icon aria-hidden="true">wb_sunny</mat-icon>
             <span>{{ 'current.uv_label' | transloco }}</span>
@@ -158,7 +158,24 @@
           <p class="tile__value">
             <strong>{{ u.value }}</strong>
           </p>
-          <p class="tile__detail">{{ u.levelKey | transloco }}</p>
+          <div
+            class="uv-gauge"
+            role="meter"
+            [attr.aria-label]="'current.uv_meter_aria' | transloco: { value: u.gaugeValue, max: u.gaugeMax }"
+            [attr.aria-valuenow]="u.gaugeValue"
+            aria-valuemin="0"
+            [attr.aria-valuemax]="u.gaugeMax"
+          >
+            <div class="uv-gauge__bars" aria-hidden="true">
+              @for (tick of uvTicks; track tick) {
+                <span
+                  class="uv-gauge__bar"
+                  [class.is-active]="tick <= u.gaugeValue"
+                  [style.height.%]="18 + tick * 8"
+                ></span>
+              }
+            </div>
+          </div>
         </article>
       }
 

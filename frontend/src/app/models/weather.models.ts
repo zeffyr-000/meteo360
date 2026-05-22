@@ -25,14 +25,20 @@ export interface WeatherCurrent {
     cloud_cover: number;
     wind_speed_10m: number;
     wind_direction_10m: number;
+    wind_gusts_10m?: number;
 }
 
 export interface WeatherHourly {
     time: string[];
     temperature_2m: number[];
+    apparent_temperature?: number[];
+    relative_humidity_2m?: number[];
     precipitation_probability: number[];
     weather_code: number[];
     wind_speed_10m: number[];
+    wind_direction_10m?: number[];
+    wind_gusts_10m?: number[];
+    uv_index?: number[];
 }
 
 export interface WeatherDaily {
@@ -42,8 +48,6 @@ export interface WeatherDaily {
     temperature_2m_min: number[];
     precipitation_sum: number[];
     wind_speed_10m_max: number[];
-    wind_gusts_10m_max?: number[];
-    uv_index_max?: number[];
     sunrise?: string[];
     sunset?: string[];
 }
@@ -72,9 +76,14 @@ export interface ForecastResponse {
 export interface HourlyPreview {
     time: string;
     temperature: number;
+    apparentTemperature: number | null;
+    humidity: number | null;
     precipitationProbability: number;
     windSpeed: number;
+    windDirection: number | null;
+    windGusts: number | null;
     weatherCode: number;
+    uvIndex: number | null;
 }
 
 export interface DailyPreview {

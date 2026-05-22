@@ -1,9 +1,7 @@
 <header class="timeline__head">
   <div>
-    <span class="timeline__eyebrow">{{ 'timeline.eyebrow' | transloco }}</span>
     <h3>{{ 'timeline.title' | transloco }}</h3>
   </div>
-  <span class="timeline__hint">{{ 'timeline.hint' | transloco }}</span>
 </header>
 
 @if (slots().length > 0) {
@@ -21,6 +19,10 @@
     </button>
 
     <div class="timeline__strip" (scroll)="onStripScroll()">
+      <span class="timeline__curve-legend" aria-hidden="true">
+        <span class="timeline__curve-swatch"></span>
+        {{ 'timeline.curve_label' | transloco }}
+      </span>
       <div class="timeline__track">
         <svg
           class="timeline__curve"

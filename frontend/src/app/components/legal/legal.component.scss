@@ -66,7 +66,7 @@
   color: var(--scene-fg) !important;
   border: var(--brand-border-w-strong) solid var(--scene-fg) !important;
   border-radius: var(--meteo-radius-panel) !important;
-  box-shadow: 5px 5px 0 0 var(--scene-fg);
+  box-shadow: var(--meteo-shadow-offset-lg) var(--scene-fg);
   transition:
     background var(--scene-duration) var(--scene-easing),
     color var(--scene-duration) var(--scene-easing),
@@ -129,7 +129,7 @@
   background: #fbe9eb !important;
   color: var(--brand-ink) !important;
   border-color: var(--brand-rouge) !important;
-  box-shadow: 5px 5px 0 0 var(--brand-rouge);
+  box-shadow: var(--meteo-shadow-offset-lg) var(--brand-rouge);
 
   .card-icon.warning-icon {
     background: var(--brand-rouge);
@@ -255,7 +255,7 @@ mat-divider {
 
   &:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 4px 4px 0 0 var(--brand-ink);
+    box-shadow: var(--meteo-shadow-offset-md) var(--brand-ink);
   }
 }
 

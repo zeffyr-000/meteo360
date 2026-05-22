@@ -154,6 +154,7 @@ curl 'https://meteo360.zeffyr.com/api/forecast?latitude=48.85341&longitude=2.348
     "timezone": "Europe/Paris",
     "current": {
       "time": "2026-05-09T14:30",
+      "interval": 900,
       "temperature_2m": 19.8,
       "relative_humidity_2m": 58,
       "apparent_temperature": 18.9,
@@ -162,14 +163,20 @@ curl 'https://meteo360.zeffyr.com/api/forecast?latitude=48.85341&longitude=2.348
       "weather_code": 3,
       "cloud_cover": 76,
       "wind_speed_10m": 11.4,
-      "wind_direction_10m": 205
+      "wind_direction_10m": 205,
+      "wind_gusts_10m": 19.2
     },
     "hourly": {
       "time": ["2026-05-09T14:00", "2026-05-09T15:00"],
       "temperature_2m": [19.8, 20.2],
+      "apparent_temperature": [18.9, 19.4],
+      "relative_humidity_2m": [58, 55],
       "precipitation_probability": [5, 10],
       "weather_code": [3, 61],
-      "wind_speed_10m": [11.4, 13.1]
+      "wind_speed_10m": [11.4, 13.1],
+      "wind_direction_10m": [205, 212],
+      "wind_gusts_10m": [19.2, 22.4],
+      "uv_index": [4.2, 4.8]
     },
     "daily": {
       "time": ["2026-05-09", "2026-05-10"],
@@ -177,26 +184,46 @@ curl 'https://meteo360.zeffyr.com/api/forecast?latitude=48.85341&longitude=2.348
       "temperature_2m_max": [21.4, 18.7],
       "temperature_2m_min": [12.1, 10.4],
       "precipitation_sum": [0, 2.3],
-      "wind_speed_10m_max": [18.2, 24.6]
+      "wind_speed_10m_max": [18.2, 24.6],
+      "sunrise": ["2026-05-09T06:18", "2026-05-10T06:17"],
+      "sunset": ["2026-05-09T21:19", "2026-05-10T21:20"]
     },
     "units": {
       "current": {
+        "time": "iso8601",
+        "interval": "seconds",
         "temperature_2m": "°C",
         "relative_humidity_2m": "%",
         "apparent_temperature": "°C",
+        "is_day": "",
         "precipitation": "mm",
-        "wind_speed_10m": "km/h"
+        "weather_code": "wmo code",
+        "cloud_cover": "%",
+        "wind_speed_10m": "km/h",
+        "wind_direction_10m": "°",
+        "wind_gusts_10m": "km/h"
       },
       "hourly": {
+        "time": "iso8601",
         "temperature_2m": "°C",
+        "apparent_temperature": "°C",
+        "relative_humidity_2m": "%",
         "precipitation_probability": "%",
-        "wind_speed_10m": "km/h"
+        "weather_code": "wmo code",
+        "wind_speed_10m": "km/h",
+        "wind_direction_10m": "°",
+        "wind_gusts_10m": "km/h",
+        "uv_index": ""
       },
       "daily": {
+        "time": "iso8601",
+        "weather_code": "wmo code",
         "temperature_2m_max": "°C",
         "temperature_2m_min": "°C",
         "precipitation_sum": "mm",
-        "wind_speed_10m_max": "km/h"
+        "wind_speed_10m_max": "km/h",
+        "sunrise": "iso8601",
+        "sunset": "iso8601"
       }
     }
   }
@@ -206,9 +233,13 @@ curl 'https://meteo360.zeffyr.com/api/forecast?latitude=48.85341&longitude=2.348
 ### Returned Forecast Sections
 
 - `current`: the current weather object returned by Open-Meteo, or `null` if the provider omits it
-- `hourly`: hourly arrays for temperature, precipitation probability, weather code, and wind speed, or `null` if omitted
-- `daily`: daily arrays for weather code, max and min temperature, precipitation sum, and max wind speed, or `null` if omitted
+- `hourly`: hourly arrays for temperature, apparent temperature, relative humidity, precipitation probability, weather code, wind speed, wind direction, wind gusts, and UV index, or `null` if omitted
+- `daily`: daily arrays for weather code, max and min temperature, precipitation sum, max wind speed, sunrise, and sunset, or `null` if omitted
 - `units`: normalized unit maps for `current`, `hourly`, and `daily`
+
+Contract note:
+
+- Meteo360 intentionally exposes wind gust and UV detail through the `hourly` section (`wind_gusts_10m`, `uv_index`). The current public `daily` contract does not include `wind_gusts_10m_max` or `uv_index_max`.
 
 ### Error Behavior
 

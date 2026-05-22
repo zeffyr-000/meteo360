@@ -51,8 +51,22 @@
   --meteo-warm: #f7e6c4;
   --meteo-border: rgba(14, 27, 44, 0.14);
   --meteo-border-strong: var(--brand-ink);
-  --meteo-shadow-soft: 0 2px 0 0 var(--brand-ink);
-  --meteo-shadow-panel: 0 4px 0 0 var(--brand-ink);
+  --meteo-shadow-offset-xs: 2px 2px 0 0;
+  --meteo-shadow-offset-sm: 3px 3px 0 0;
+  --meteo-shadow-offset-md: 4px 4px 0 0;
+  --meteo-shadow-offset-lg: 5px 5px 0 0;
+  --meteo-shadow-offset-panel: 6px 6px 0 0;
+  --meteo-shadow-offset-dialog: 8px 8px 0 0;
+  --meteo-shadow-offset-rail: 8px 0 0 0;
+  --meteo-shadow-soft: var(--meteo-shadow-offset-xs) var(--brand-ink);
+  --meteo-shadow-panel: var(--meteo-shadow-offset-md) var(--brand-ink);
+  --meteo-shadow-ambient: 0 4px 0 0 rgba(14, 27, 44, 0.08);
+  --meteo-ring-signal: 0 0 0 3px rgba(244, 196, 48, 0.3);
+  --meteo-ring-signal-soft: 0 0 0 2px rgba(244, 196, 48, 0.35);
+  --meteo-ring-rouge: 0 0 0 3px rgba(230, 57, 70, 0.3);
+  --meteo-ring-rouge-clear: 0 0 0 6px rgba(230, 57, 70, 0);
+  --meteo-ring-ink: 0 0 0 1px var(--brand-ink);
+  --meteo-highlight-inset: inset 0 2px 0 rgba(255, 255, 255, 0.32);
 
   // Shape language — brutalist edges + editorial cards + pills
   --meteo-radius-block: 2px;
@@ -163,7 +177,7 @@ body {
     padding: 0;
     border: var(--brand-border-w-strong) solid var(--brand-ink);
     border-radius: var(--meteo-radius-card);
-    box-shadow: 8px 8px 0 0 var(--brand-ink);
+    box-shadow: var(--meteo-shadow-offset-dialog) var(--brand-ink);
   }
 }
 
@@ -174,7 +188,7 @@ body {
 .mat-mdc-autocomplete-panel {
   border: var(--brand-border-w) solid var(--brand-ink) !important;
   border-radius: var(--meteo-radius-card) !important;
-  box-shadow: 4px 4px 0 0 var(--brand-ink) !important;
+  box-shadow: var(--meteo-shadow-offset-md) var(--brand-ink) !important;
 }
 
 .mat-mdc-tooltip .mdc-tooltip__surface {
