@@ -154,7 +154,7 @@
 
   &:hover:not([disabled]) {
     transform: translate(-1px, -1px);
-    box-shadow: 3px 3px 0 0 var(--brand-ink);
+    box-shadow: var(--meteo-shadow-offset-sm) var(--brand-ink);
   }
 }
 

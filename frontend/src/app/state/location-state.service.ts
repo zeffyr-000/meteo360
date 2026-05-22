@@ -50,7 +50,7 @@ export class LocationStateService {
             return;
           }
           this.locating.set(false);
-          this.noticeKey.set('location.detected');
+          this.noticeKey.set(null);
           this.selectPlace(this.buildCurrentLocationPlace(coords.latitude, coords.longitude));
         },
         error: (error: GeolocationPositionError) => {
@@ -94,7 +94,7 @@ export class LocationStateService {
   }
 
   applyPickedPlace(place: WeatherPlace): void {
-    this.noticeKey.set(place.id === CURRENT_LOCATION_ID ? 'location.detected' : null);
+    this.noticeKey.set(null);
     this.selectPlace(place);
   }
 

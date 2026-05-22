@@ -1,5 +1,6 @@
 :host {
   display: block;
+  overflow-x: hidden;
   min-height: 100vh;
   color: var(--scene-fg);
   transition: color var(--scene-duration) var(--scene-easing);
@@ -8,8 +9,17 @@
 .app-container {
   position: relative;
   z-index: 1;
+  min-width: 0;
+  max-width: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
   background: transparent;
+}
+
+mat-sidenav-content {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 // ─── Sidenav ─────────────────────────────────────────────────────────────────
@@ -17,8 +27,17 @@ mat-sidenav {
   width: 320px;
   background: var(--brand-paper);
   color: var(--brand-ink);
-  border-right: var(--brand-border-w-strong) solid var(--brand-ink);
+  border-right: var(--brand-border-w-strong) solid transparent;
   border-radius: 0;
+  box-shadow: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: geometricPrecision;
+}
+
+.app-container mat-sidenav.sidenav-panel.mat-drawer-opened,
+.app-container mat-sidenav.sidenav-panel.mat-drawer-animating {
+  border-right-color: var(--brand-ink);
+  box-shadow: var(--meteo-shadow-offset-rail) var(--brand-signal);
 }
 
 .sidenav-brand {
@@ -41,6 +60,7 @@ mat-sidenav {
   font-weight: 700;
   letter-spacing: 0.08em;
   border-radius: var(--meteo-radius-block);
+  box-shadow: var(--meteo-shadow-offset-sm) var(--brand-signal);
 }
 
 .sidenav-brand__name {
@@ -56,6 +76,11 @@ mat-nav-list {
   padding: 18px 12px;
 
   a[mat-list-item] {
+    color: var(--brand-ink);
+    --mdc-list-list-item-label-text-color: var(--brand-ink);
+    --mdc-list-list-item-leading-icon-color: var(--brand-ink);
+    --mat-list-list-item-label-text-color: var(--brand-ink);
+    --mat-list-list-item-leading-icon-color: var(--brand-ink);
     margin: 4px 0;
     min-height: 56px;
     border-radius: var(--meteo-radius-card);
@@ -66,13 +91,24 @@ mat-nav-list {
     transition:
       background-color var(--ui-duration) var(--ui-easing),
       border-color var(--ui-duration) var(--ui-easing),
+      color var(--ui-duration) var(--ui-easing),
       transform var(--ui-duration) var(--ui-easing);
+
+    mat-icon,
+    [matListItemTitle] {
+      color: inherit;
+    }
 
     &:hover {
       background-color: rgba(14, 27, 44, 0.06);
+      color: var(--brand-ink);
+      --mdc-list-list-item-label-text-color: var(--brand-ink);
+      --mdc-list-list-item-leading-icon-color: var(--brand-ink);
+      --mat-list-list-item-label-text-color: var(--brand-ink);
+      --mat-list-list-item-leading-icon-color: var(--brand-ink);
       border-color: var(--brand-ink);
       transform: translate(-2px, -2px);
-      box-shadow: 4px 4px 0 0 var(--brand-ink);
+      box-shadow: var(--meteo-shadow-offset-md) var(--brand-ink);
     }
 
     &.active-link,
@@ -80,9 +116,12 @@ mat-nav-list {
       background-color: var(--brand-ink);
       color: var(--brand-signal);
       --mdc-list-list-item-label-text-color: var(--brand-signal);
+      --mdc-list-list-item-leading-icon-color: var(--brand-signal);
+      --mat-list-list-item-label-text-color: var(--brand-signal);
+      --mat-list-list-item-leading-icon-color: var(--brand-signal);
       border-color: var(--brand-ink);
       transform: none;
-      box-shadow: 4px 4px 0 0 var(--brand-signal);
+      box-shadow: var(--meteo-shadow-offset-md) var(--brand-signal);
 
       mat-icon {
         color: var(--brand-signal);
@@ -103,17 +142,47 @@ mat-nav-list {
   padding: 14px 24px;
   background: var(--brand-paper);
   border-bottom: var(--brand-border-w-strong) solid var(--brand-ink);
+  box-shadow: var(--meteo-shadow-ambient);
 }
 
-.masthead__menu {
+.masthead__menu,
+.masthead__icon-btn {
+  display: inline-grid;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  padding: 0;
+  place-items: center;
+  flex-shrink: 0;
+  line-height: 1;
+  --mdc-icon-button-icon-size: 22px;
+  --mdc-icon-button-state-layer-size: 42px;
   border: var(--brand-border-w) solid var(--brand-ink);
   border-radius: var(--meteo-radius-block);
   background: var(--brand-paper);
   color: var(--brand-ink);
+  transition:
+    transform var(--ui-duration) var(--ui-easing),
+    background var(--ui-duration) var(--ui-easing),
+    color var(--ui-duration) var(--ui-easing),
+    box-shadow var(--ui-duration) var(--ui-easing);
 
+  mat-icon {
+    display: grid;
+    width: 22px;
+    height: 22px;
+    place-items: center;
+    font-size: 22px;
+    line-height: 1;
+  }
+}
+
+.masthead__menu {
   &:hover {
     background: var(--brand-ink);
     color: var(--brand-signal);
+    transform: translate(-2px, -2px);
+    box-shadow: var(--meteo-shadow-offset-md) var(--brand-signal);
   }
 }
 
@@ -135,6 +204,8 @@ mat-nav-list {
   font-weight: 700;
   letter-spacing: 0.1em;
   border-radius: var(--meteo-radius-block);
+  box-shadow: var(--meteo-shadow-offset-md) var(--brand-signal);
+  transform: rotate(-1deg);
 }
 
 .masthead__copy {
@@ -198,7 +269,7 @@ mat-nav-list {
   height: 8px;
   border-radius: 50%;
   background: var(--brand-signal-deep);
-  box-shadow: 0 0 0 3px rgba(244, 196, 48, 0.3);
+  box-shadow: var(--meteo-ring-signal);
 
   .masthead__status.is-syncing & {
     background: var(--brand-rouge);
@@ -207,25 +278,16 @@ mat-nav-list {
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.3); }
-  50%      { transform: scale(1.3); box-shadow: 0 0 0 6px rgba(230, 57, 70, 0); }
+  0%, 100% { transform: scale(1); box-shadow: var(--meteo-ring-rouge); }
+  50%      { transform: scale(1.3); box-shadow: var(--meteo-ring-rouge-clear); }
 }
 
 .masthead__icon-btn {
-  border: var(--brand-border-w) solid var(--brand-ink);
-  border-radius: var(--meteo-radius-block);
-  background: var(--brand-paper);
-  color: var(--brand-ink);
-  transition:
-    transform var(--ui-duration) var(--ui-easing),
-    background var(--ui-duration) var(--ui-easing),
-    color var(--ui-duration) var(--ui-easing);
-
   &:hover:not(:disabled) {
     background: var(--brand-ink);
     color: var(--brand-signal);
     transform: translate(-2px, -2px);
-    box-shadow: 4px 4px 0 0 var(--brand-ink);
+    box-shadow: var(--meteo-shadow-offset-md) var(--brand-signal);
   }
 
   &:disabled {
@@ -237,6 +299,9 @@ mat-nav-list {
 .stage {
   position: relative;
   z-index: 1;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: hidden;
   padding: 32px 24px 80px;
   color: var(--scene-fg);
   transition: color var(--scene-duration) var(--scene-easing);

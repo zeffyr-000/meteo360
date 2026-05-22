@@ -1,13 +1,15 @@
 # Material Design Guide - Meteo360
 
-Meteo360 uses Angular Material 21 with a Material Design 3 theme. The UI goal is a compact, readable weather dashboard, not a marketing landing page.
+Meteo360 uses Angular Material 21 as the accessible interaction baseline and layers a project-specific neo-brutalist visual system on top. The UI goal is a compact, readable weather dashboard, not a marketing landing page.
+
+Use `DESIGN_SYSTEM.md` for visual tokens. Use this guide for Material integration rules.
 
 ## UI Philosophy
 
 - prioritize weather data readability
-- keep primary actions visible at all times
-- prefer Angular Material components over custom controls
-- use visual atmosphere without sacrificing operational clarity
+- keep primary actions visible and keyboard-accessible
+- prefer Angular Material components for controls, dialogs, inputs, tooltips, and progress indicators
+- keep custom UI focused on weather-specific visualization, such as glyphs, rolling numbers, UV meter, and timeline curve
 - preserve mobile usability and touch-friendly controls
 
 ## Global Theme
@@ -21,11 +23,11 @@ html {
   @include mat.theme((
     color: (
       primary: mat.$azure-palette,
-      tertiary: mat.$orange-palette
+      tertiary: mat.$yellow-palette
     ),
     typography: (
       plain-family: 'Roboto',
-      brand-family: 'Roboto'
+      brand-family: 'Fraunces'
     ),
     density: (
       scale: 0
@@ -34,134 +36,135 @@ html {
 }
 ```
 
-Fonts and icons are loaded locally through:
+Material provides component behavior and baseline theming. Meteo360 applies custom borders, typography, shadows, and scene colors through CSS custom properties.
+
+## Fonts And Icons
+
+Fonts and icons are loaded locally:
 
 ```scss
 @import '@fontsource/roboto/300.css';
 @import '@fontsource/roboto/400.css';
 @import '@fontsource/roboto/500.css';
 @import '@fontsource/roboto/700.css';
-@import 'material-icons/iconfont/material-icons.css';
+
+@import '@fontsource/fraunces/400.css';
+@import '@fontsource/fraunces/500.css';
+@import '@fontsource/fraunces/600.css';
+@import '@fontsource/fraunces/700.css';
+@import '@fontsource/fraunces/900.css';
+
+@import '@fontsource/space-grotesk/400.css';
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/space-grotesk/700.css';
+
+@import 'material-symbols/sharp.css';
 ```
 
-## Project Tokens
+`mat-icon` is globally mapped to Material Symbols Sharp with filled, heavier axes. Keep icon names compatible with Material Symbols.
 
-Current global variables:
+## Material Components In Use
 
-```scss
-:root {
-  --meteo-ink: #17383b;
-  --meteo-muted: #607274;
-  --meteo-surface: #f7fbfa;
-  --meteo-surface-card: rgba(255, 255, 255, 0.86);
-  --meteo-surface-raised: rgba(255, 255, 255, 0.96);
-  --meteo-teal: #1f7a76;
-  --meteo-sun: #d77a39;
-  --meteo-rain: #4597be;
-  --meteo-night: #233a57;
-  --meteo-sky: #def4ff;
-  --meteo-mint: #e8f7f0;
-  --meteo-warm: #fff1dd;
-  --meteo-border: rgba(23, 56, 59, 0.1);
-  --meteo-border-strong: rgba(23, 56, 59, 0.18);
-  --meteo-shadow-soft: 0 14px 32px rgba(23, 56, 59, 0.08);
-  --meteo-shadow-panel: 0 24px 60px rgba(23, 56, 59, 0.12);
-  --meteo-radius-card: 8px;
-  --meteo-radius-panel: 8px;
-}
-```
+Current Angular Material modules include:
 
-Primary uses:
-
-- `--meteo-ink`: main text color
-- `--meteo-muted`: secondary text and metadata
-- `--meteo-surface`: global page background
-- `--meteo-surface-card`: translucent dashboard panels
-- `--meteo-surface-raised`: raised controls and dialog surfaces
-- `--meteo-teal`: actions, active states, status accents
-- `--meteo-sun`: weather icons and warm accents
-- `--meteo-rain`: precipitation data visualization
-- `--meteo-night`: night and storm panel backgrounds
-- `--meteo-sky`: light atmospheric surfaces
-- `--meteo-mint`: secondary cool surfaces
-- `--meteo-warm`: warm detail surfaces
-- `--meteo-border`: default panel and tile borders
-- `--meteo-border-strong`: emphasized borders and selected states
-- `--meteo-shadow-soft`: small panel elevation
-- `--meteo-shadow-panel`: primary dashboard panel elevation
-- `--meteo-radius-card`: compact cards, controls, and metric tiles
-- `--meteo-radius-panel`: dashboard panels and framed visual areas
-
-## Angular Material Components In Use
-
-The root dashboard currently imports and uses:
-
-- `MatButtonModule`
 - `MatAutocompleteModule`
+- `MatButtonModule`
 - `MatDialogModule`
 - `MatFormFieldModule`
 - `MatIconModule`
 - `MatInputModule`
 - `MatProgressSpinnerModule`
+- `MatSidenavModule`
 - `MatTooltipModule`
+
+Only import Material modules in components that need them. Keep standalone component imports explicit.
+
+## Component Rules
+
+### Buttons
+
+- Use `mat-icon-button` for icon-only commands such as refresh, search, and scroll chevrons.
+- Use `mat-stroked-button` for secondary textual commands such as returning to the live forecast.
+- Keep icon-only buttons labeled with translated `aria-label` and tooltip text.
+- Do not replace Material buttons with custom clickable divs.
+
+### Dialogs And Forms
+
+- Use `MatDialog` for the location search modal.
+- Use `mat-form-field` with `appearance="outline"` for search input.
+- Use `MatAutocomplete` for place suggestions.
+- Style the dialog surface through scoped global overrides in `frontend/src/styles.scss`.
+
+### Tooltips And Status
+
+- Use `MatTooltip` for icon-only or compact controls.
+- Do not use tooltip text as the only accessible label.
+- Keep animated status text from becoming noisy in screen readers.
+
+### Custom Weather Visualization
+
+Custom UI is allowed when Material does not provide the weather-specific behavior:
+
+- `app-weather-glyph` for Meteo360 weather identity
+- `app-rolling-number` for large numeric weather readings
+- SVG temperature curve in the timeline
+- UV meter and sun progress indicators
+
+Custom visualizations must expose meaningful ARIA attributes when they communicate data. Decorative glyphs should remain hidden from assistive tech when equivalent text is already present.
 
 ## Layout Rules
 
 ### Shell
 
-The main `app-shell` combines a soft atmospheric gradient with subtle overlays. The implementation uses:
+The app shell combines Material navigation with a Meteo360 dashboard layer:
 
-- `width: min(1180px, 100%)` for the main content containers
-- desktop shell padding of `28px 28px 46px`
-- mobile shell padding reduced to `12px` to `18px` depending on viewport width
-- layered gradients and textures without flattening the dashboard into a plain surface
+- `width: min(1180px, 100%)` for main content containers
+- desktop shell padding around `28px 28px 46px`
+- mobile shell padding reduced to `12px` to `18px`
+- paper and atmospheric background treatment without landing-page composition
 
 ### Cards And Panels
 
-The dashboard uses a consistent 8px radius across key surfaces:
+The current shape scale is:
 
 ```scss
-border-radius: 8px;
+--meteo-radius-block: 2px;
+--meteo-radius-card: 4px;
+--meteo-radius-panel: 6px;
+--meteo-radius-pill: 999px;
 ```
 
-This applies to:
-
-- the brand mark
-- the search dialog
-- the current weather panel
-- the timeline panel
-- metric cards
-- search suggestion rows and status pills
+Use these tokens instead of raw `border-radius` values. The old 8px rule is obsolete.
 
 ### Current Weather Panel
 
-The current weather panel uses:
+The current weather panel uses Material for controls and progress feedback, then custom layout for weather reading:
 
-- a day theme by default
-- dedicated variants for night, rain, storm, snow, and fog states
-- a large weather icon frame
-- compact context chips for time, timezone, and day or night state
-- three primary metric cards for apparent temperature, rain, and wind
-- detail tiles for humidity, cloud cover, wind direction, and update time
+- live or preview tags
+- selected place and metadata
+- rolling temperature display
+- custom glyph frame
+- wind, humidity, UV, and precipitation metric tiles
+- sun progress or night summary
+- panel transition sweep on selected period changes
 
-### Search And Discovery
+The panel must remain data-first: avoid decorative copy and keep labels short.
 
-The search area is built with:
+### Timeline Panel
 
-- `mat-form-field` in `outline` appearance
-- autocomplete suggestions with place metadata
-- a secondary stroked button for current location detection
-- translated tooltip and ARIA labels for icon-only actions
-- typed hint, empty, and error notices with icons
+The timeline uses custom horizontal scrolling because it represents weather-specific forecast exploration:
 
-### Forecast Views
+- per-day groups
+- slot cards
+- SVG temperature curve
+- Material icon buttons for desktop scroll controls
+- touch scrolling under `760px`
 
-- the timeline panel is the central forecast surface: per-day groups, scroll chevrons on desktop, and a mini temperature curve drawn as an SVG overlay
-- timeline slots are selectable cards exposing condition, temperature, rain probability, and wind speed
+Keep selection visible through shape, fill, and text treatment, not color alone.
 
 ## Responsive Rules
 
-Current breakpoints across component SCSS files (`dashboard.component.scss`, `current-conditions.component.scss`, etc.):
+Use the existing breakpoints:
 
 ```scss
 @media (max-width: 1050px) { ... }
@@ -170,34 +173,40 @@ Current breakpoints across component SCSS files (`dashboard.component.scss`, `cu
 @media (max-width: 430px) { ... }
 ```
 
-Behavior by breakpoint:
+Expected behavior:
 
-- under `1050px`, the dashboard grid keeps its single column stack (hero then timeline)
-- under `760px`, shell padding tightens, masthead secondary elements (eyebrow, rule, status) are hidden while the single-row layout is preserved, hero stacks to one column, metrics move to two columns and timeline chevrons are hidden in favor of touch scrolling
-- under `600px`, dashboard shell gap tightens further
-- under `430px`, metric cards and hourly cards collapse to a single column
-
-Keep text from overflowing in buttons, cards, and metric values.
+- the dashboard remains a single column: current weather, then timeline
+- under `760px`, timeline chevrons hide and touch scrolling becomes primary
+- under `430px`, metric cards stay compact and timeline cards remain horizontally scrollable
+- text must not overflow buttons, tags, cards, tiles, or timeline slots
 
 ## Accessibility Expectations
 
-- use Material components for built-in ARIA and keyboard support where possible
-- keep `aria-label` and tooltips on icon-only actions
-- preserve sufficient contrast between text and background layers
-- do not rely on color alone to represent the active state
-- keep focusable controls keyboard-accessible and visually distinct
+- preserve native Material keyboard behavior wherever possible
+- keep focus indicators visible and high contrast
+- add translated `aria-label` values for icon-only actions
+- use ARIA meter/progress semantics for custom data displays when appropriate
+- avoid announcing decorative animation changes
+- verify contrast for `--brand-signal` on paper and ink surfaces before using it for small text
 
 ## Weather Icon Mapping
 
-The `weatherIcon()` utility maps WMO groups to Material icons.
+The `weatherIcon()` utility maps WMO groups to Material Symbols names.
 
-Current groups:
-
-| WMO codes | Material icon |
-| --------- | ------------- |
+| WMO codes | Symbol |
+| --------- | ------ |
 | `0` | `wb_sunny` |
 | `1, 2, 3` | `filter_drama` |
 | `51, 53, 55, 61, 63, 65, 80, 81, 82` | `grain` |
 | `71, 73, 75, 77, 85, 86` | `ac_unit` |
 | `95, 96, 99` | `flash_on` |
 | fallback | `cloud` |
+
+## Review Checklist
+
+- Material controls are used where they provide accessibility or interaction behavior.
+- Custom controls have keyboard, focus, and ARIA coverage.
+- New user-facing text goes through Transloco.
+- New SCSS uses design tokens instead of raw values when possible.
+- Mobile behavior is checked at `760px` and `430px`.
+- Animations still communicate state when reduced motion is enabled.

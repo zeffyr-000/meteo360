@@ -39,7 +39,7 @@
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  box-shadow: 3px 3px 0 0 var(--brand-ink);
+  box-shadow: var(--meteo-shadow-offset-sm) var(--brand-ink);
 
   mat-icon {
     width: 18px;

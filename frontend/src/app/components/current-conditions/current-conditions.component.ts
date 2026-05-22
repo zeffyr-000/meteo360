@@ -1,5 +1,5 @@
 import { DecimalPipe, DatePipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -18,7 +18,8 @@ type WeatherMood = 'clear' | 'variable' | 'fog' | 'rainy' | 'snowy' | 'storm' | 
 
 interface UvSummary {
   value: number;
-  levelKey: string;
+  gaugeValue: number;
+  gaugeMax: number;
 }
 
 interface SunArc {
@@ -38,6 +39,7 @@ interface SunNight {
 }
 
 type SunData = SunArc | SunNight;
+const UV_GAUGE_MAX = 10;
 
 /** Converts an Open-Meteo place-local ISO string ("YYYY-MM-DDTHH:mm") into a UTC Date
  * using the place's UTC offset. All Open-Meteo local-time strings must be parsed this way
@@ -62,7 +64,11 @@ function localIsoToDate(iso: string, utcOffsetSeconds: number): Date {
   ],
   templateUrl: './current-conditions.component.html',
   styleUrl: './current-conditions.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[attr.data-period-ready]': 'periodTransitionReady() ? "true" : null',
+    '[attr.data-period-phase]': 'periodPhase()'
+  }
 })
 export class CurrentConditionsComponent {
   private readonly forecastState = inject(ForecastStateService);
@@ -76,6 +82,9 @@ export class CurrentConditionsComponent {
   protected readonly isCurrentLocation = this.locationState.isCurrentLocation;
   protected readonly placeMeta = this.locationState.placeMeta;
   protected readonly locating = this.locationState.locating;
+  protected readonly periodPhase = signal(0);
+  protected readonly periodTransitionReady = signal(false);
+  protected readonly uvTicks = Array.from({ length: UV_GAUGE_MAX }, (_, index) => index + 1);
   protected readonly timezone = computed(
     () => this.forecastState.forecast()?.timezone ?? this.selectedPlace()?.timezone ?? null
   );
@@ -119,6 +128,29 @@ export class CurrentConditionsComponent {
     return this.selectedHour()?.time ?? null;
   });
 
+  private readonly periodKey = computed(() => this.displayTime() ?? 'empty');
+
+  private lastPeriodKey: string | null = null;
+
+  constructor() {
+    effect(() => {
+      const nextPeriodKey = this.periodKey();
+      if (this.lastPeriodKey === null) {
+        this.lastPeriodKey = nextPeriodKey;
+        return;
+      }
+      if (this.lastPeriodKey === 'empty' && nextPeriodKey !== 'empty') {
+        this.lastPeriodKey = nextPeriodKey;
+        return;
+      }
+      if (nextPeriodKey !== this.lastPeriodKey) {
+        this.lastPeriodKey = nextPeriodKey;
+        this.periodTransitionReady.set(true);
+        this.periodPhase.update((phase) => (phase + 1) % 2);
+      }
+    });
+  }
+
   /** Converts an Open-Meteo local-time ISO string to a proper UTC Date for use with DatePipe + timezone. */
   protected toLocalDate(iso: string): Date {
     const offset = this.utcOffset();
@@ -126,10 +158,10 @@ export class CurrentConditionsComponent {
   }
 
   protected readonly feelsLike = computed<number | null>(() => {
-    if (!this.isLive()) {
-      return null;
+    if (this.isLive()) {
+      return this.current()?.apparent_temperature ?? this.selectedHour()?.apparentTemperature ?? null;
     }
-    return this.current()?.apparent_temperature ?? null;
+    return this.selectedHour()?.apparentTemperature ?? null;
   });
 
   protected readonly dailyRange = computed<{ min: number; max: number } | null>(() => {
@@ -154,45 +186,40 @@ export class CurrentConditionsComponent {
   });
 
   protected readonly windDirection = computed<number | null>(() => {
-    if (!this.isLive()) return null;
-    return this.current()?.wind_direction_10m ?? null;
+    if (this.isLive()) {
+      return this.current()?.wind_direction_10m ?? this.selectedHour()?.windDirection ?? null;
+    }
+    return this.selectedHour()?.windDirection ?? null;
   });
 
   protected readonly windCardinalLabel = computed(() => windCardinal(this.windDirection()));
 
   protected readonly windGusts = computed<number | null>(() => {
-    const daily = this.daily();
-    const i = this.todayDailyIndex();
-    if (!daily || i < 0) {
-      return null;
+    if (this.isLive()) {
+      return this.current()?.wind_gusts_10m ?? this.selectedHour()?.windGusts ?? null;
     }
-    return daily.wind_gusts_10m_max?.[i] ?? null;
+    return this.selectedHour()?.windGusts ?? null;
   });
 
   protected readonly humidity = computed<number | null>(() => {
-    if (!this.isLive()) return null;
-    return this.current()?.relative_humidity_2m ?? null;
+    if (this.isLive()) {
+      return this.current()?.relative_humidity_2m ?? this.selectedHour()?.humidity ?? null;
+    }
+    return this.selectedHour()?.humidity ?? null;
   });
 
   protected readonly uv = computed<UvSummary | null>(() => {
-    const daily = this.daily();
-    const i = this.todayDailyIndex();
-    const raw = daily?.uv_index_max?.[i];
+    const raw = this.selectedHour()?.uvIndex;
     if (raw === undefined || raw === null) {
       return null;
     }
     const rounded = Math.round(raw);
-    let levelKey = 'weather.uv_level_low';
-    if (rounded >= 11) {
-      levelKey = 'weather.uv_level_extreme';
-    } else if (rounded >= 8) {
-      levelKey = 'weather.uv_level_very_high';
-    } else if (rounded >= 6) {
-      levelKey = 'weather.uv_level_high';
-    } else if (rounded >= 3) {
-      levelKey = 'weather.uv_level_moderate';
-    }
-    return { value: rounded, levelKey };
+    const gaugeValue = Math.max(0, Math.min(UV_GAUGE_MAX, rounded));
+    return {
+      value: rounded,
+      gaugeValue,
+      gaugeMax: UV_GAUGE_MAX
+    };
   });
 
   protected readonly precip24h = computed<number | null>(() => {
@@ -267,7 +294,8 @@ export class CurrentConditionsComponent {
   /** Resolves the in-house SVG glyph that replaces Material icons in the headline. */
   protected readonly weatherGlyph = computed<WeatherGlyph>(() => {
     const mood = this.weatherMood();
-    const isDay = this.isLive() ? this.current()?.is_day !== 0 : null;
+    const sun = this.sunData();
+    const isDay = this.isLive() ? this.current()?.is_day !== 0 : sun?.mode === 'day';
     switch (mood) {
       case 'clear':
         return isDay === false ? 'moon' : 'sun';

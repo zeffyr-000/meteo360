@@ -1,17 +1,32 @@
 :host {
   display: block;
   position: relative;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
   padding: 22px 24px 24px;
   background: var(--scene-surface);
   color: var(--scene-fg);
   border: var(--brand-border-w-strong) solid var(--scene-fg);
   border-radius: var(--meteo-radius-panel);
-  box-shadow: 6px 6px 0 0 var(--scene-fg);
+  box-shadow: var(--meteo-shadow-offset-panel) var(--scene-fg);
   transition:
     background var(--scene-duration) var(--scene-easing),
     color var(--scene-duration) var(--scene-easing),
     border-color var(--scene-duration) var(--scene-easing),
     box-shadow var(--scene-duration) var(--scene-easing);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    width: 42px;
+    height: 42px;
+    border-top: var(--brand-border-w-strong) solid var(--brand-signal);
+    border-right: var(--brand-border-w-strong) solid var(--brand-signal);
+    pointer-events: none;
+  }
 }
 
 .timeline__head {
@@ -24,33 +39,14 @@
   border-bottom: var(--brand-border-w) dashed rgba(14, 27, 44, 0.4);
 }
 
-.timeline__eyebrow {
-  display: block;
-  font-family: var(--font-grotesk);
-  font-size: var(--type-eyebrow);
-  font-weight: 700;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(14, 27, 44, 0.62);
-}
-
 .timeline__head h3 {
-  margin: 4px 0 0;
+  margin: 0;
   font-family: var(--font-display);
   font-size: clamp(1.4rem, 2.4vw, 1.9rem);
   font-style: italic;
   font-weight: 700;
   letter-spacing: -0.015em;
   color: var(--brand-ink);
-}
-
-.timeline__hint {
-  font-family: var(--font-grotesk);
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(14, 27, 44, 0.55);
 }
 
 // ─── Viewport : chevrons + scrolling strip ──────────────────────────────────
@@ -60,6 +56,9 @@
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: stretch;
   gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
 }
 
 .timeline__chevron {
@@ -68,7 +67,7 @@
   background: var(--brand-paper);
   border: var(--brand-border-w) solid var(--brand-ink);
   border-radius: var(--meteo-radius-block);
-  box-shadow: 3px 3px 0 0 var(--brand-ink);
+  box-shadow: var(--meteo-shadow-offset-sm) var(--brand-ink);
   transition:
     transform var(--ui-duration) var(--ui-easing),
     box-shadow var(--ui-duration) var(--ui-easing),
@@ -76,7 +75,7 @@
 
   &:hover:not([disabled]) {
     transform: translate(-1px, -1px);
-    box-shadow: 4px 4px 0 0 var(--brand-ink);
+    box-shadow: var(--meteo-shadow-offset-md) var(--brand-ink);
   }
 
   &[disabled] {
@@ -89,21 +88,21 @@
 // ─── Strip : scroll-snap film reel ───────────────────────────────────────────
 .timeline__strip {
   position: relative;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   overflow-y: hidden;
+  overscroll-behavior-inline: contain;
   scroll-snap-type: x mandatory;
   scroll-padding: 4px;
   padding: 2px 2px 14px;
 
-  // Subtle scrollbar
-  scrollbar-width: thin;
-  scrollbar-color: var(--brand-ink) transparent;
+  // Keep horizontal exploration touch/trackpad-friendly without exposing a page-like scrollbar.
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 
-  &::-webkit-scrollbar { height: 6px; }
-  &::-webkit-scrollbar-thumb {
-    background: var(--brand-ink);
-    border-radius: var(--meteo-radius-pill);
-  }
+  &::-webkit-scrollbar { display: none; }
 }
 
 .timeline__track {
@@ -111,8 +110,40 @@
   display: inline-flex;
   align-items: flex-end;
   gap: 18px;
+  width: max-content;
   min-width: 100%;
   padding-top: 52px; // reserve room for the curve
+}
+
+.timeline__curve-legend {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: max-content;
+  padding: 4px 7px;
+  background: var(--scene-surface);
+  border: var(--brand-border-w) solid rgba(14, 27, 44, 0.48);
+  border-radius: var(--meteo-radius-block);
+  color: rgba(14, 27, 44, 0.72);
+  font-family: var(--font-grotesk);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  pointer-events: none;
+  text-transform: uppercase;
+}
+
+.timeline__curve-swatch {
+  display: inline-block;
+  width: 18px;
+  height: 3px;
+  background: var(--brand-signal);
+  border: 1px solid var(--brand-ink);
 }
 
 // ─── Mini temperature curve ─────────────────────────────────────────────────
@@ -210,7 +241,7 @@
 
   &:hover {
     transform: translate(-2px, -2px);
-    box-shadow: 4px 4px 0 0 var(--brand-ink);
+    box-shadow: var(--meteo-shadow-offset-md) var(--brand-ink);
   }
 
   &:focus-visible {
@@ -227,7 +258,7 @@
   &.is-selected:not(.is-now) {
     background: var(--brand-signal);
     color: var(--brand-ink);
-    box-shadow: 4px 4px 0 0 var(--brand-ink);
+    box-shadow: var(--meteo-shadow-offset-md) var(--brand-ink);
   }
 
   &.is-future-day {
@@ -339,11 +370,10 @@
 @media (max-width: 760px) {
   :host {
     padding: 18px 16px 20px;
-    box-shadow: 4px 4px 0 0 var(--scene-fg);
+    box-shadow: var(--meteo-shadow-offset-md) var(--scene-fg);
   }
 
   .timeline__head {
-    flex-direction: column;
     align-items: flex-start;
   }
 
@@ -358,6 +388,11 @@
   .timeline__track {
     gap: 14px;
     padding-top: 44px;
+  }
+
+  .timeline__curve-legend {
+    font-size: 0.56rem;
+    letter-spacing: 0.08em;
   }
 
   .group + .group {
