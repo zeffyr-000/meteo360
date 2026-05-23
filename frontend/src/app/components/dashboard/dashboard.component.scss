@@ -30,7 +30,7 @@
   gap: 10px;
   margin: 0;
   padding: 10px 14px;
-  background: rgba(244, 239, 230, 0.92);
+  background: var(--meteo-surface-card);
   border: var(--brand-border-w) solid var(--brand-ink);
   border-left-width: 5px;
   border-radius: var(--meteo-radius-block);

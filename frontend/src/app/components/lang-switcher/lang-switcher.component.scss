@@ -1,0 +1,33 @@
+:host {
+  display: block;
+}
+
+.lang-switcher {
+  padding: 12px 12px 16px;
+}
+
+.lang-switcher__group {
+  width: 100%;
+  border: var(--brand-border-w-strong) solid var(--brand-ink);
+  border-radius: var(--meteo-radius-card);
+  background: transparent;
+  box-shadow: var(--meteo-shadow-offset-sm) var(--brand-signal);
+  overflow: hidden;
+
+  --mat-button-toggle-text-color: var(--brand-ink);
+  --mat-button-toggle-selected-state-text-color: var(--brand-signal);
+  --mat-button-toggle-selected-state-background-color: var(--brand-ink);
+  --mat-button-toggle-background-color: transparent;
+  --mat-button-toggle-divider-color: var(--brand-ink);
+  --mat-button-toggle-focus-state-layer-opacity: 0;
+
+  .mat-button-toggle {
+    flex: 1;
+    font-family: var(--font-grotesk);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 0;
+  }
+}

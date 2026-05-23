@@ -100,7 +100,7 @@ mat-nav-list {
     }
 
     &:hover {
-      background-color: rgba(14, 27, 44, 0.06);
+      background-color: var(--meteo-hover-bg);
       color: var(--brand-ink);
       --mdc-list-list-item-label-text-color: var(--brand-ink);
       --mdc-list-list-item-leading-icon-color: var(--brand-ink);

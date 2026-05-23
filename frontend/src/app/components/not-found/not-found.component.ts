@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/cor
 import { RouterModule } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { MetadataService } from '../../services/metadata.service';
 
@@ -20,12 +20,11 @@ import { MetadataService } from '../../services/metadata.service';
 })
 export class NotFoundComponent implements OnInit {
   private readonly metadataService = inject(MetadataService);
-  private readonly transloco = inject(TranslocoService);
 
   ngOnInit(): void {
     this.metadataService.updatePageMetadata({
-      title: this.transloco.translate('not_found.title'),
-      description: this.transloco.translate('seo.not_found.description')
+      titleKey: 'not_found.title',
+      descriptionKey: 'seo.not_found.description'
     });
   }
 }

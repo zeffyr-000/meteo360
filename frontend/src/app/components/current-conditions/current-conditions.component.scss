@@ -108,10 +108,7 @@
   display: grid;
   gap: 14px;
   padding-bottom: 16px;
-  border-bottom: var(--brand-border-w) dashed rgba(14, 27, 44, 0.4);
-}
-
-.headline__moment {
+  border-bottom: var(--brand-border-w) dashed var(--meteo-rule);
   align-items: center;
   display: flex;
   flex-wrap: wrap;
@@ -146,7 +143,7 @@
 
   &--quiet {
     background: transparent;
-    border-color: rgba(14, 27, 44, 0.3);
+    border-color: var(--meteo-rule-soft);
     color: var(--scene-fg-muted);
     font-variant-numeric: tabular-nums;
     letter-spacing: 0.08em;
@@ -191,10 +188,7 @@
 
 .headline__eyebrow {
   align-items: center;
-  color: rgba(14, 27, 44, 0.62);
-  display: flex;
-  font-family: var(--font-grotesk);
-  font-size: var(--type-eyebrow);
+  color: var(--meteo-text-muted);
   font-weight: 700;
   gap: 6px;
   letter-spacing: 0.22em;
@@ -221,7 +215,7 @@
 }
 
 .headline__place-meta {
-  color: rgba(14, 27, 44, 0.6);
+  color: var(--meteo-text-secondary);
   font-family: var(--font-grotesk);
   font-size: 0.78rem;
   font-weight: 500;
@@ -238,7 +232,7 @@
   gap: 24px;
   grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
   padding-bottom: 20px;
-  border-bottom: var(--brand-border-w) dashed rgba(14, 27, 44, 0.4);
+  border-bottom: var(--brand-border-w) dashed var(--meteo-rule);
 }
 
 .hero__condition {
@@ -266,7 +260,7 @@
   display: flex;
   height: 104px;
   justify-content: center;
-  filter: drop-shadow(4px 4px 0 rgba(14, 27, 44, 0.18));
+  filter: drop-shadow(4px 4px 0 var(--meteo-border-faint));
   transform: rotate(-2deg);
   width: 104px;
 }
@@ -318,7 +312,7 @@
   padding: 8px 12px;
 
   dt {
-    color: rgba(14, 27, 44, 0.62);
+    color: var(--meteo-text-muted);
     font-family: var(--font-grotesk);
     font-size: 0.65rem;
     font-weight: 700;
@@ -342,7 +336,7 @@
 }
 
 .hero__range-sep {
-  color: rgba(14, 27, 44, 0.45);
+  color: var(--meteo-text-caption);
   margin: 0 6px;
 }
 
@@ -363,7 +357,7 @@
   grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
   margin: 0;
   padding-bottom: 20px;
-  border-bottom: var(--brand-border-w) dashed rgba(14, 27, 44, 0.4);
+  border-bottom: var(--brand-border-w) dashed var(--meteo-rule);
 }
 
 .tile {
@@ -415,7 +409,7 @@
 }
 
 .tile__unit {
-  color: rgba(14, 27, 44, 0.6);
+  color: var(--meteo-text-secondary);
   font-family: var(--font-grotesk);
   font-size: 0.7rem;
   font-weight: 700;
@@ -425,7 +419,7 @@
 
 .tile__detail {
   align-items: center;
-  color: rgba(14, 27, 44, 0.65);
+  color: var(--meteo-text-muted);
   display: flex;
   flex-wrap: wrap;
   font-family: var(--font-grotesk);
@@ -467,8 +461,8 @@
 .uv-gauge__bar {
   display: block;
   min-height: 4px;
-  background: rgba(14, 27, 44, 0.16);
-  border: 1px solid rgba(14, 27, 44, 0.22);
+  background: var(--meteo-border-faint);
+  border: 1px solid var(--meteo-border-light);
   border-radius: 1px 1px 0 0;
   transition:
     background var(--scene-duration) var(--scene-easing),
@@ -541,7 +535,7 @@
 }
 
 .sun__length {
-  color: rgba(14, 27, 44, 0.62);
+  color: var(--meteo-text-muted);
   font-family: var(--font-grotesk);
   font-size: 0.72rem;
   font-weight: 600;
@@ -581,7 +575,7 @@
   }
 
   .sun__night-next {
-    color: rgba(14, 27, 44, 0.65);
+    color: var(--meteo-text-muted);
     font-family: var(--font-grotesk);
     font-size: 0.8rem;
     font-weight: 600;

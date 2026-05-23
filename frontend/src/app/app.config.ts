@@ -1,6 +1,7 @@
 import { provideHttpClient, withFetch } from '@angular/common/http';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
+import localeEn from '@angular/common/locales/en';
 import {
   ApplicationConfig,
   Injectable,
@@ -16,13 +17,16 @@ import { Observable, of } from 'rxjs';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
 import { frTranslations } from './i18n/fr';
+import { enTranslations } from './i18n/en';
+import { LANG_STORAGE_KEY } from './services/storage.service';
 
 registerLocaleData(localeFr);
+registerLocaleData(localeEn, 'en-US');
 
 @Injectable({ providedIn: 'root' })
 export class TranslocoInlineLoader implements TranslocoLoader {
-  getTranslation(): Observable<Translation> {
-    return of(frTranslations);
+  getTranslation(lang: string): Observable<Translation> {
+    return of(lang === 'en' ? enTranslations : frTranslations);
   }
 }
 
@@ -35,7 +39,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideTransloco({
       config: {
-        availableLangs: ['fr'],
+        availableLangs: ['fr', 'en'],
         defaultLang: 'fr',
         reRenderOnLangChange: true,
         prodMode: environment.production
@@ -43,6 +47,13 @@ export const appConfig: ApplicationConfig = {
       loader: TranslocoInlineLoader
     }),
     provideTranslocoMessageformat(),
-    { provide: LOCALE_ID, useValue: 'fr-FR' }
+    { provide: LOCALE_ID, useFactory: (): string => {
+      try {
+        const raw = localStorage.getItem(LANG_STORAGE_KEY);
+        return raw && JSON.parse(raw) === 'en' ? 'en-US' : 'fr-FR';
+      } catch {
+        return 'fr-FR';
+      }
+    }}
   ]
 };

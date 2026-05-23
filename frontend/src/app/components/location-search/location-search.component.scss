@@ -128,7 +128,7 @@
   gap: 10px;
   margin: 0;
   padding: 10px 12px;
-  background: rgba(14, 27, 44, 0.05);
+  background: var(--meteo-hover-bg);
   border: var(--brand-border-w) dashed var(--brand-ink);
   border-radius: var(--meteo-radius-block);
   color: var(--brand-ink);
@@ -221,7 +221,7 @@
 }
 
 .suggestion__text small {
-  color: rgba(14, 27, 44, 0.6);
+  color: var(--meteo-text-secondary);
   font-size: 0.74rem;
   font-weight: 600;
   letter-spacing: 0.04em;

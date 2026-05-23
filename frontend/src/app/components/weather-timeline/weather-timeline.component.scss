@@ -36,7 +36,7 @@
   gap: 14px;
   margin-bottom: 18px;
   padding-bottom: 12px;
-  border-bottom: var(--brand-border-w) dashed rgba(14, 27, 44, 0.4);
+  border-bottom: var(--brand-border-w) dashed var(--meteo-rule);
 }
 
 .timeline__head h3 {
@@ -126,9 +126,9 @@
   width: max-content;
   padding: 4px 7px;
   background: var(--scene-surface);
-  border: var(--brand-border-w) solid rgba(14, 27, 44, 0.48);
+  border: var(--brand-border-w) solid var(--meteo-text-caption);
   border-radius: var(--meteo-radius-block);
-  color: rgba(14, 27, 44, 0.72);
+  color: var(--meteo-text-strong);
   font-family: var(--font-grotesk);
   font-size: 0.62rem;
   font-weight: 700;
@@ -176,7 +176,7 @@
 
   & + & {
     padding-left: 18px;
-    border-left: var(--brand-border-w) dashed rgba(14, 27, 44, 0.3);
+    border-left: var(--brand-border-w) dashed var(--meteo-rule-soft);
   }
 }
 
@@ -201,8 +201,8 @@
   font-style: italic;
   font-size: 0.85rem;
   font-weight: 600;
-  color: rgba(14, 27, 44, 0.6);
   font-variant-numeric: tabular-nums;
+  color: var(--meteo-text-secondary);
 }
 
 .group__slots {
