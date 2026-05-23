@@ -144,5 +144,19 @@ export const frTranslations = {
         subtitle: 'Page introuvable',
         message: 'La page que vous recherchez n\'existe pas ou a été déplacée.',
         back: 'Retour à la météo'
+    },
+    seo: {
+        default: {
+            description: 'Prévisions météo en temps réel. Consultez les conditions actuelles et les prévisions horaires pour n\'importe quelle ville.'
+        },
+        dashboard: {
+            description: 'Consultez la météo actuelle, les prévisions horaires et les indicateurs clés pour n\'importe quelle ville avec Meteo360.'
+        },
+        legal: {
+            description: 'Mentions légales, informations sur le projet Meteo360 et crédits des technologies utilisées.'
+        },
+        not_found: {
+            description: 'La page demandée est introuvable. Retournez au tableau de bord météo Meteo360.'
+        }
     }
 };

@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslocoModule } from '@jsverse/transloco';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { LocationSearchComponent } from './components/location-search/location-search.component';
 import { WeatherPlace } from './models/weather.models';
@@ -24,7 +24,7 @@ import { LocationStateService } from './state/location-state.service';
     MatListModule,
     MatSidenavModule,
     MatTooltipModule,
-    TranslocoModule
+    TranslocoPipe
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss',
