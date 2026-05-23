@@ -39,6 +39,7 @@
     "@fontsource/space-grotesk": "^5.2.10",
     "@jsverse/transloco": "^8.3.0",
     "@jsverse/transloco-messageformat": "^8.3.0",
+    "material-icons": "^1.13.14",
     "material-symbols": "^0.44.8",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0"

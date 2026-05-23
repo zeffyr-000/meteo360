@@ -1,7 +1,8 @@
-import { computed, DestroyRef, inject, Injectable, NgZone, signal } from '@angular/core';
+import { computed, DestroyRef, effect, inject, Injectable, NgZone, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { WeatherPlace } from '../models/weather.models';
+import { StorageService } from '../services/storage.service';
 import { WeatherService } from '../services/weather.service';
 import { geolocationErrorKey, getCurrentPosition } from '../utils/geolocation.util';
 
@@ -11,6 +12,7 @@ const DEFAULT_CITY = 'Paris';
 @Injectable({ providedIn: 'root' })
 export class LocationStateService {
   private readonly weatherService = inject(WeatherService);
+  private readonly storageService = inject(StorageService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
 
@@ -27,6 +29,25 @@ export class LocationStateService {
     const place = this.selectedPlace();
     return [place?.admin1, place?.country].filter(Boolean).join(' · ');
   });
+
+  constructor() {
+    // Restore place from localStorage on startup (with validation)
+    const savedPlace = this.storageService.getSelectedPlace();
+    if (savedPlace && typeof savedPlace.latitude === 'number' && typeof savedPlace.longitude === 'number') {
+      this.selectedPlace.set(savedPlace);
+    }
+
+    // Automatically persist place on every change (skip the initial run)
+    let initialized = false;
+    effect(() => {
+      const place = this.selectedPlace();
+      if (!initialized) {
+        initialized = true;
+        return;
+      }
+      this.storageService.setSelectedPlace(place);
+    });
+  }
 
   selectPlace(place: WeatherPlace): void {
     if (place.latitude === null || place.longitude === null) {

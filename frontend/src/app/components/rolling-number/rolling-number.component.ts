@@ -56,8 +56,8 @@ export class RollingNumberComponent {
     const destroyRef = inject(DestroyRef);
 
     // Update _prev only after the flip animation has fully completed.
-    // 420ms is the animation duration; the 30ms buffer ensures the animation
-    // frame has settled before we reset the comparison baseline.
+    // 180ms flip-in + 120ms delay = 300ms total; the 30ms buffer ensures the
+    // animation frame has settled before we reset the comparison baseline.
     // Using queueMicrotask would fire before the browser paints, stripping
     // .is-changed before the CSS animation can run.
     effect(() => {
@@ -68,7 +68,7 @@ export class RollingNumberComponent {
       this._animTimer = setTimeout(() => {
         this._animTimer = null;
         this._prev.set(v);
-      }, 450);
+      }, 330);
     });
 
     destroyRef.onDestroy(() => {

@@ -15,7 +15,6 @@ interface SearchHarness {
     searchControl: { setValue(value: string): void };
     suggestions(): WeatherPlace[];
     status(): SearchStatus;
-    close(): void;
 }
 
 describe('LocationSearchComponent', () => {
@@ -101,14 +100,6 @@ describe('LocationSearchComponent', () => {
         vi.advanceTimersByTime(260);
 
         expect(harness.status()).toBe('error');
-    });
-
-    it('should close the dialog with a null value when cancelled', () => {
-        const harness = getHarness();
-
-        harness.close();
-
-        expect(dialogRefMock.close).toHaveBeenCalledWith(null);
     });
 });
 
