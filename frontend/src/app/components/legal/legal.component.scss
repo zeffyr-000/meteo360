@@ -41,7 +41,7 @@
 
 .legal-subtitle {
   margin: 0;
-  color: rgba(14, 27, 44, 0.65);
+  color: var(--meteo-text-muted);
   font-family: var(--font-grotesk);
   font-size: 0.78rem;
   font-weight: 700;
@@ -94,7 +94,7 @@
     font-weight: 700 !important;
     letter-spacing: 0.12em !important;
     text-transform: uppercase !important;
-    color: rgba(14, 27, 44, 0.6) !important;
+    color: var(--meteo-text-secondary) !important;
   }
 
   .card-icon {
@@ -203,13 +203,13 @@
     margin: 0 !important;
     font-family: var(--font-grotesk);
     font-size: 0.86rem;
-    color: rgba(14, 27, 44, 0.7) !important;
+    color: var(--meteo-text-strong) !important;
   }
 }
 
 mat-divider {
   margin: 0;
-  border-color: rgba(14, 27, 44, 0.18) !important;
+  border-color: var(--meteo-border-faint) !important;
 }
 
 // ─── Author ──────────────────────────────────────────────────────────────────
@@ -219,7 +219,7 @@ mat-divider {
   font-size: 0.78rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(14, 27, 44, 0.65) !important;
+  color: var(--meteo-text-muted) !important;
   margin-bottom: 16px !important;
 }
 
@@ -262,7 +262,7 @@ mat-divider {
 .link-description {
   font-family: var(--font-grotesk);
   font-size: 0.82rem !important;
-  color: rgba(14, 27, 44, 0.65) !important;
+  color: var(--meteo-text-muted) !important;
   margin-bottom: 6px !important;
 }
 

@@ -1,0 +1,15 @@
+<div class="lang-switcher">
+  <mat-button-toggle-group
+    class="lang-switcher__group"
+    [value]="activeLang()"
+    [attr.aria-label]="'nav.lang_select' | transloco"
+    hideSingleSelectionIndicator
+  >
+    <mat-button-toggle value="fr" (click)="switchLang('fr')">
+      {{ 'nav.lang_fr' | transloco }}
+    </mat-button-toggle>
+    <mat-button-toggle value="en" (click)="switchLang('en')">
+      {{ 'nav.lang_en' | transloco }}
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+</div>

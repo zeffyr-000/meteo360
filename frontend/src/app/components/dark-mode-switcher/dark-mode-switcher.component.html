@@ -1,0 +1,15 @@
+<div class="theme-switcher">
+  <mat-button-toggle-group
+    class="theme-switcher__group"
+    [value]="darkMode() ? 'dark' : 'light'"
+    [attr.aria-label]="'nav.theme_select' | transloco"
+    hideSingleSelectionIndicator
+  >
+    <mat-button-toggle value="light" (click)="toggle('light')">
+      {{ 'nav.theme_light' | transloco }}
+    </mat-button-toggle>
+    <mat-button-toggle value="dark" (click)="toggle('dark')">
+      {{ 'nav.theme_dark' | transloco }}
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+</div>

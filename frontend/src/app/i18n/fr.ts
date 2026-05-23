@@ -106,7 +106,13 @@ export const frTranslations = {
         home: 'Météo',
         legal: 'Mentions légales',
         open_menu: 'Ouvrir le menu de navigation',
-        close_menu: 'Fermer le menu de navigation'
+        close_menu: 'Fermer le menu de navigation',
+        lang_fr: 'Français',
+        lang_en: 'Anglais',
+        theme_light: 'Clair',
+        theme_dark: 'Sombre',
+        lang_select: 'Choisir la langue',
+        theme_select: 'Choisir le thème'
     },
     legal: {
         title: 'Mentions légales',

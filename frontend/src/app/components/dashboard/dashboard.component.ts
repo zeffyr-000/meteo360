@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, effect, inject } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { CurrentConditionsComponent } from '../current-conditions/current-conditions.component';
 import { WeatherTimelineComponent } from '../weather-timeline/weather-timeline.component';
@@ -24,7 +24,6 @@ export class DashboardComponent implements OnInit {
   protected readonly locationState = inject(LocationStateService);
   protected readonly forecastState = inject(ForecastStateService);
   private readonly metadataService = inject(MetadataService);
-  private readonly transloco = inject(TranslocoService);
 
   constructor() {
     effect(() => {
@@ -37,8 +36,8 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.metadataService.updatePageMetadata({
-      title: this.transloco.translate('nav.home'),
-      description: this.transloco.translate('seo.dashboard.description')
+      titleKey: 'nav.home',
+      descriptionKey: 'seo.dashboard.description'
     });
     if (!this.locationState.selectedPlace()) {
       this.locationState.detectCurrentLocation(true);

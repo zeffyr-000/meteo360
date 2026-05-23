@@ -28,6 +28,7 @@
 :root {
   // Brand identity — deep ink + sodium yellow signature
   --brand-ink: #0e1b2c;
+  --brand-ink-rgb: 14, 27, 44;
   --brand-ink-soft: #1c2f47;
   --brand-paper: #f4efe6;
   --brand-paper-warm: #ece4d3;
@@ -50,7 +51,19 @@
   --meteo-sky: #d4e7f2;
   --meteo-mint: #e6efe8;
   --meteo-warm: #f7e6c4;
-  --meteo-border: rgba(14, 27, 44, 0.14);
+  --meteo-border: rgba(var(--brand-ink-rgb), 0.14);
+
+  // Alpha tokens — semantic opacity scale built on --brand-ink-rgb
+  // Override --brand-ink-rgb in html.dark to flip them all at once.
+  --meteo-hover-bg:         rgba(var(--brand-ink-rgb), 0.06);
+  --meteo-border-faint:     rgba(var(--brand-ink-rgb), 0.16);
+  --meteo-border-light:     rgba(var(--brand-ink-rgb), 0.22);
+  --meteo-rule-soft:        rgba(var(--brand-ink-rgb), 0.30);
+  --meteo-rule:             rgba(var(--brand-ink-rgb), 0.40);
+  --meteo-text-caption:     rgba(var(--brand-ink-rgb), 0.48);
+  --meteo-text-secondary:   rgba(var(--brand-ink-rgb), 0.60);
+  --meteo-text-muted:       rgba(var(--brand-ink-rgb), 0.62);
+  --meteo-text-strong:      rgba(var(--brand-ink-rgb), 0.72);
   --meteo-border-strong: var(--brand-ink);
   --meteo-shadow-offset-xs: 2px 2px 0 0;
   --meteo-shadow-offset-sm: 3px 3px 0 0;
@@ -61,7 +74,7 @@
   --meteo-shadow-offset-rail: 8px 0 0 0;
   --meteo-shadow-soft: var(--meteo-shadow-offset-xs) var(--brand-ink);
   --meteo-shadow-panel: var(--meteo-shadow-offset-md) var(--brand-ink);
-  --meteo-shadow-ambient: 0 4px 0 0 rgba(14, 27, 44, 0.08);
+  --meteo-shadow-ambient: 0 4px 0 0 rgba(var(--brand-ink-rgb), 0.08);
   --meteo-ring-signal: 0 0 0 3px rgba(244, 196, 48, 0.3);
   --meteo-ring-signal-soft: 0 0 0 2px rgba(244, 196, 48, 0.35);
   --meteo-ring-rouge: 0 0 0 3px rgba(230, 57, 70, 0.3);
@@ -106,7 +119,7 @@
   --scene-paper: #f4efe6;
   --scene-surface: #f7f2e9;
   --scene-surface-soft: #efe8d8;
-  --scene-rule: rgba(14, 27, 44, 0.32);
+  --scene-rule: rgba(var(--brand-ink-rgb), 0.32);
   --scene-glow: rgba(244, 196, 48, 0.32);
   --scene-grain-opacity: 0.06;
 }
@@ -117,6 +130,7 @@
 
 // ─── Material 21 theme ────────────────────────────────────────────────────────
 html {
+  color-scheme: light;
   @include mat.theme((
     color: (
       primary: mat.$azure-palette,
@@ -146,12 +160,87 @@ body {
 
   // Subtle paper grain across the whole app
   background-image:
-    radial-gradient(circle at 12% 20%, rgba(14, 27, 44, 0.04), transparent 38%),
+    radial-gradient(circle at 12% 20%, rgba(var(--brand-ink-rgb), 0.04), transparent 38%),
     radial-gradient(circle at 88% 80%, rgba(244, 196, 48, 0.06), transparent 42%);
 }
 
 * {
   box-sizing: border-box;
+}
+
+// ─── Dark mode ───────────────────────────────────────────────────────────────
+// Angular Material compiles its tokens to static values, not light-dark() functions.
+// A second @include mat.theme() with theme-type: dark is required to regenerate all
+// Material system tokens (--mat-sys-*, --mdc-*) for dark mode.
+// Our brand/scene custom properties are then overridden after the mixin.
+html.dark {
+  color-scheme: dark;
+
+  @include mat.theme((
+    color: (
+      primary: mat.$azure-palette,
+      tertiary: mat.$yellow-palette,
+      theme-type: dark
+    )
+  ));
+
+  // Brand palette — inverted ink/paper relationship
+  --brand-ink:          #e8ddd0;
+  --brand-ink-rgb:      232, 221, 208;
+  --brand-paper:        #0e1b2c;
+  --brand-paper-warm:   #162338;
+  --brand-signal:       #f4c430; // sodium yellow unchanged — the dark bg amplifies it
+  --brand-signal-deep:  #d9a800;
+
+  // Surfaces
+  --meteo-surface-card:    rgba(22, 35, 56, 0.94);
+  --meteo-surface-raised:  #1c2f47;
+  --meteo-border:          rgba(232, 221, 208, 0.14);
+
+  // Shadows — offset uses --brand-ink which is now light → light shadow on dark bg
+  --meteo-shadow-ambient:     0 4px 0 0 rgba(232, 221, 208, 0.06);
+  --meteo-highlight-inset:    inset 0 2px 0 rgba(232, 221, 208, 0.10);
+
+  // Scene palette
+  --scene-fg:           #e8ddd0;
+  --scene-fg-muted:     #8fa0b5;
+  --scene-accent:       var(--brand-signal-deep);
+  --scene-paper:        #0e1b2c;
+  --scene-surface:      #111e2e;
+  --scene-surface-soft: #162338;
+  --scene-sky-top:      #0c1f3a;
+  --scene-sky-mid:      #0e1b2c;
+  --scene-sky-bot:      #091527;
+  --scene-rule:         rgba(232, 221, 208, 0.32);
+  --scene-glow:         rgba(244, 196, 48, 0.14);
+  --scene-grain-opacity: 0.04;
+
+  // ─── Active / selected UI states ────────────────────────────────────────────
+  // In light mode: bg=--brand-ink (navy) + text=--brand-signal (yellow) = high contrast.
+  // In dark mode: --brand-ink becomes cream → cream bg + yellow text = ~1.7:1 = unreadable.
+  // Fix: use signal (yellow) bg + paper (dark navy) text for all active/selected states.
+
+  // Nav list active link
+  mat-nav-list a[mat-list-item].active-link,
+  mat-nav-list a[mat-list-item].active-link:hover {
+    background-color: var(--brand-signal);
+    color: var(--brand-paper);
+    border-color: var(--brand-signal);
+    box-shadow: var(--meteo-shadow-offset-md) var(--brand-paper);
+    --mdc-list-list-item-label-text-color: var(--brand-paper);
+    --mdc-list-list-item-leading-icon-color: var(--brand-paper);
+    --mat-list-list-item-label-text-color: var(--brand-paper);
+    --mat-list-list-item-leading-icon-color: var(--brand-paper);
+
+    mat-icon { color: var(--brand-paper); }
+  }
+
+  // Button toggle selected state (lang-switcher + dark-mode-switcher)
+  .lang-switcher__group,
+  .theme-switcher__group {
+    --mat-button-toggle-selected-state-background-color: var(--brand-signal);
+    --mat-button-toggle-selected-state-text-color: var(--brand-paper);
+  }
 }
 
 // ─── Reduced motion ──────────────────────────────────────────────────────────

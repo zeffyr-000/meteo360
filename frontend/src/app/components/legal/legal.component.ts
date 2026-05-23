@@ -4,7 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
-import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { MetadataService } from '../../services/metadata.service';
 
@@ -28,12 +28,11 @@ export class LegalComponent implements OnInit {
   protected readonly openMeteoUrl = 'https://open-meteo.com/';
 
   private readonly metadataService = inject(MetadataService);
-  private readonly transloco = inject(TranslocoService);
 
   ngOnInit(): void {
     this.metadataService.updatePageMetadata({
-      title: this.transloco.translate('legal.title'),
-      description: this.transloco.translate('seo.legal.description')
+      titleKey: 'legal.title',
+      descriptionKey: 'seo.legal.description'
     });
   }
 }

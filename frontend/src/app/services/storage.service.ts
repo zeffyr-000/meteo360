@@ -14,10 +14,12 @@ type StorageResult<T> =
  * Service managing user preferences persistence in localStorage.
  * Handles 3 values: selected place, language, and dark mode preference.
  */
+export const LANG_STORAGE_KEY = 'meteo360.lang';
+
 @Injectable({ providedIn: 'root' })
 export class StorageService {
   private readonly storageKeyPlace = 'meteo360.selectedPlace';
-  private readonly storageKeyLang = 'meteo360.lang';
+  private readonly storageKeyLang = LANG_STORAGE_KEY;
   private readonly storageKeyDarkMode = 'meteo360.darkMode';
 
   private readonly defaultLang = 'fr';
@@ -140,12 +142,12 @@ export class StorageService {
    * Retrieve the language from localStorage.
    * Returns 'fr' by default if not set or if the stored value is invalid.
    */
-  getLang(): string {
+  getLang(): 'fr' | 'en' {
     const result = this.getItem<unknown>(this.storageKeyLang);
-    if (result.status === 'ok' && typeof result.value === 'string') {
+    if (result.status === 'ok' && (result.value === 'fr' || result.value === 'en')) {
       return result.value;
     }
-    // Normalize corrupted values (but don't write if storage unavailable)
+    // Normalize corrupted or unrecognized values (but don't write if storage unavailable)
     if (result.status === 'ok') {
       this.setLang(this.defaultLang);
     }
