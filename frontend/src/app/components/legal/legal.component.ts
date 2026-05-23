@@ -1,10 +1,12 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { RouterModule } from '@angular/router';
-import { TranslocoModule } from '@jsverse/transloco';
+import { TranslocoPipe, TranslocoService } from '@jsverse/transloco';
+
+import { MetadataService } from '../../services/metadata.service';
 
 @Component({
   selector: 'app-legal',
@@ -14,14 +16,24 @@ import { TranslocoModule } from '@jsverse/transloco';
     MatDividerModule,
     MatIconModule,
     RouterModule,
-    TranslocoModule
+    TranslocoPipe
   ],
   templateUrl: './legal.component.html',
   styleUrl: './legal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class LegalComponent {
+export class LegalComponent implements OnInit {
   protected readonly authorGithub = 'https://github.com/zeffyr-000/';
   protected readonly projectRepo = 'https://github.com/zeffyr-000/meteo360';
   protected readonly openMeteoUrl = 'https://open-meteo.com/';
+
+  private readonly metadataService = inject(MetadataService);
+  private readonly transloco = inject(TranslocoService);
+
+  ngOnInit(): void {
+    this.metadataService.updatePageMetadata({
+      title: this.transloco.translate('legal.title'),
+      description: this.transloco.translate('seo.legal.description')
+    });
+  }
 }

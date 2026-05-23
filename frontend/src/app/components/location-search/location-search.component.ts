@@ -8,7 +8,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { TranslocoModule } from '@jsverse/transloco';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { catchError, debounceTime, distinctUntilChanged, filter, of, switchMap, tap } from 'rxjs';
 
 import { WeatherPlace } from '../../models/weather.models';
@@ -32,7 +32,7 @@ type SearchStatus = 'idle' | 'hint' | 'loading' | 'results' | 'empty' | 'error';
     MatIconModule,
     MatInputModule,
     MatProgressSpinnerModule,
-    TranslocoModule
+    TranslocoPipe
   ],
   templateUrl: './location-search.component.html',
   styleUrl: './location-search.component.scss',

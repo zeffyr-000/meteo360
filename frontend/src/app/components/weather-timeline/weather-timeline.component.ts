@@ -12,7 +12,7 @@ import {
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslocoModule } from '@jsverse/transloco';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { TimelineSlot } from '../../models/weather.models';
 import { ForecastStateService } from '../../state/forecast-state.service';
@@ -40,7 +40,7 @@ const SCROLL_STEP_RATIO = 0.8;
 
 @Component({
   selector: 'app-weather-timeline',
-  imports: [DatePipe, DecimalPipe, MatButtonModule, MatIconModule, MatTooltipModule, TranslocoModule],
+  imports: [DatePipe, DecimalPipe, MatButtonModule, MatIconModule, MatTooltipModule, TranslocoPipe],
   templateUrl: './weather-timeline.component.html',
   styleUrl: './weather-timeline.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

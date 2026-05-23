@@ -4,7 +4,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { TranslocoModule } from '@jsverse/transloco';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 import { RollingNumberComponent } from '../rolling-number/rolling-number.component';
 import { WeatherGlyphComponent, type WeatherGlyph } from '../weather-glyph/weather-glyph.component';
@@ -58,7 +58,7 @@ function localIsoToDate(iso: string, utcOffsetSeconds: number): Date {
     MatIconModule,
     MatProgressSpinnerModule,
     MatTooltipModule,
-    TranslocoModule,
+    TranslocoPipe,
     RollingNumberComponent,
     WeatherGlyphComponent
   ],
