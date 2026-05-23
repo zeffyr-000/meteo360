@@ -139,8 +139,4 @@ export class LocationSearchComponent {
   protected placeMeta(place: WeatherPlace): string {
     return [place.admin1, place.country].filter(Boolean).join(' · ');
   }
-
-  protected close(): void {
-    this.dialogRef.close(null);
-  }
 }

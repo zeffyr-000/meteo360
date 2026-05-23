@@ -20,6 +20,7 @@
 @import '@fontsource/space-grotesk/500.css';
 @import '@fontsource/space-grotesk/700.css';
 
+@import 'material-icons/iconfont/material-icons.css';
 @import 'material-symbols/sharp.css';
 
 // ─── Design tokens ───────────────────────────────────────────────────────────
@@ -220,4 +221,15 @@ mat-icon,
   text-rendering: optimizeLegibility;
   -webkit-font-feature-settings: 'liga';
   font-feature-settings: 'liga';
+}
+
+// ─── Form field prefix icons fix ─────────────────────────────────────────────
+// Ensure prefix icons use Material Icons font (not Material Symbols Sharp)
+// which has better compatibility with MDC form-field rendering.
+.mat-mdc-text-field-wrapper mat-icon[matPrefix] {
+  font-family: 'Material Icons', sans-serif !important;
+  font-weight: normal !important;
+  font-style: normal !important;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
