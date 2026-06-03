@@ -81,7 +81,13 @@ export const frTranslations = {
         uv_label: 'UV',
         uv_meter_aria: 'Jauge UV {{value}} sur {{max}}',
         wind_gusts: 'Rafales',
-        precipitation_24h: 'Pluie 24 h',
+        precipitation_24h: 'Pluie du jour',
+        rain_chart_aria: 'Pluie heure par heure sur la journée',
+        rain_intensity: {
+          dry: 'Temps sec',
+          showers: 'Quelques averses',
+          steady: 'Pluie soutenue'
+        },
         sun_progress_aria: 'Course du soleil',
         day_length: 'Durée du jour',
         night: 'Nuit',

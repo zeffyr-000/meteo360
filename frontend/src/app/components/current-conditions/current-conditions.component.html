@@ -179,16 +179,32 @@
         </article>
       }
 
-      @if (precip24h() !== null) {
-        <article class="tile">
+      @if (rainProfile(); as rain) {
+        <article class="tile tile--rain" [attr.data-intensity]="rain.intensity">
           <header class="tile__header">
             <mat-icon aria-hidden="true">umbrella</mat-icon>
             <span>{{ 'current.precipitation_24h' | transloco }}</span>
           </header>
           <p class="tile__value">
-            <strong>{{ precip24h() | number: '1.0-1' }}</strong>
+            <strong>{{ rain.total | number: '1.0-1' }}</strong>
             <span class="tile__unit">mm</span>
           </p>
+          <p class="rain-badge">{{ 'current.rain_intensity.' + rain.intensity | transloco }}</p>
+          @if (rain.hasHourly && rain.intensity !== 'dry') {
+            <div
+              class="rain-bars"
+              role="img"
+              [attr.aria-label]="'current.rain_chart_aria' | transloco"
+            >
+              @for (bar of rain.bars; track bar.time) {
+                <span
+                  class="rain-bars__bar"
+                  [class.is-wet]="bar.wet"
+                  [style.height.%]="bar.heightPct"
+                ></span>
+              }
+            </div>
+          }
         </article>
       }
     </section>

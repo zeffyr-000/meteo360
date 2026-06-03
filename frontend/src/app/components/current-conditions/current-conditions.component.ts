@@ -41,6 +41,28 @@ interface SunNight {
 type SunData = SunArc | SunNight;
 const UV_GAUGE_MAX = 10;
 
+/** One hour of the rain histogram. `heightPct` is a visual share of the day's peak (0-100),
+ * not a measured value. `wet` flags hours with meaningful rain so dry hours render flat.
+ * `time` is the hour's ISO string, used as a stable track key. */
+interface RainBar {
+  time: string;
+  heightPct: number;
+  wet: boolean;
+}
+
+/** Plain-language rain intensity for a general audience (no meteorologist jargon). */
+type RainIntensity = 'dry' | 'showers' | 'steady';
+
+interface RainProfile {
+  total: number;
+  intensity: RainIntensity;
+  bars: RainBar[];
+  hasHourly: boolean;
+}
+
+/** Below this hourly value (mm) an hour is considered dry for the histogram. */
+const RAIN_WET_THRESHOLD_MM = 0.1;
+
 /** Converts an Open-Meteo place-local ISO string ("YYYY-MM-DDTHH:mm") into a UTC Date
  * using the place's UTC offset. All Open-Meteo local-time strings must be parsed this way
  * to avoid browser-timezone contamination when comparing sunrise/sunset/current times.
@@ -222,13 +244,51 @@ export class CurrentConditionsComponent {
     };
   });
 
-  protected readonly precip24h = computed<number | null>(() => {
+  protected readonly precipToday = computed<number | null>(() => {
     const daily = this.daily();
     const i = this.todayDailyIndex();
     if (!daily || i < 0) {
       return null;
     }
     return daily.precipitation_sum[i] ?? null;
+  });
+
+  /** Visual rain summary for the displayed calendar day: a simple hourly histogram plus a
+   * plain-language intensity label. Designed to be read at a glance, not to expose raw values. */
+  protected readonly rainProfile = computed<RainProfile | null>(() => {
+    const total = this.precipToday();
+    if (total === null) {
+      return null;
+    }
+    const daily = this.daily();
+    const i = this.todayDailyIndex();
+    const day = daily && i >= 0 ? daily.time[i]?.slice(0, 10) : null;
+    const hours = day
+      ? this.forecastState.hourlyPreview().filter((h) => h.time.slice(0, 10) === day)
+      : [];
+    const mmValues = hours.map((h) => (h.precipitation !== null ? Math.max(0, h.precipitation) : 0));
+    const hasHourly = hours.some((h) => h.precipitation !== null);
+    const peak = mmValues.reduce((max, mm) => Math.max(max, mm), 0);
+    const wetHours = mmValues.filter((mm) => mm >= RAIN_WET_THRESHOLD_MM).length;
+
+    const bars: RainBar[] = hours.map((hour, index) => {
+      const mm = mmValues[index];
+      const wet = mm >= RAIN_WET_THRESHOLD_MM;
+      // Wet hours keep a visible floor so light rain stays readable; dry hours render flat.
+      const heightPct = wet && peak > 0 ? Math.max(12, Math.round((mm / peak) * 100)) : 0;
+      return { time: hour.time, heightPct, wet };
+    });
+
+    let intensity: RainIntensity;
+    if (total < 0.5) {
+      intensity = 'dry';
+    } else if (wetHours >= 6 || total >= 10) {
+      intensity = 'steady';
+    } else {
+      intensity = 'showers';
+    }
+
+    return { total, intensity, bars, hasHourly };
   });
 
   protected readonly sunData = computed<SunData | null>(() => {

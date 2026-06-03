@@ -81,7 +81,13 @@ export const enTranslations = {
         uv_label: 'UV',
         uv_meter_aria: 'UV gauge {{value}} out of {{max}}',
         wind_gusts: 'Gusts',
-        precipitation_24h: 'Rain 24 h',
+        precipitation_24h: 'Rain today',
+        rain_chart_aria: 'Hour-by-hour rainfall across the day',
+        rain_intensity: {
+          dry: 'Dry',
+          showers: 'A few showers',
+          steady: 'Steady rain'
+        },
         sun_progress_aria: 'Sun position',
         day_length: 'Daylight',
         night: 'Night',
