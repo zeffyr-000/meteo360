@@ -476,9 +476,64 @@
   }
 }
 
-// ─────────────────────────────────────────────
-// Zone 4 — Sun arc
-// ─────────────────────────────────────────────
+// Rain tile — visual 24 h histogram (general-public, glance-readable)
+.tile--rain {
+  gap: 8px;
+}
+
+.rain-badge {
+  align-self: flex-start;
+  margin: 0;
+  padding: 3px 8px;
+  border: var(--brand-border-w) solid var(--brand-ink);
+  border-radius: var(--meteo-radius-pill);
+  background: var(--brand-paper-warm);
+  color: var(--brand-ink);
+  font-family: var(--font-grotesk);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.tile--rain[data-intensity='showers'] .rain-badge {
+  background: color-mix(in srgb, var(--brand-azure) 18%, var(--brand-paper-warm));
+}
+
+.tile--rain[data-intensity='steady'] .rain-badge {
+  background: var(--brand-azure);
+  color: var(--brand-paper);
+}
+
+.rain-bars {
+  align-items: end;
+  background: var(--brand-paper-warm);
+  border: var(--brand-border-w) solid var(--brand-ink);
+  border-radius: var(--meteo-radius-block);
+  display: grid;
+  gap: 1px;
+  grid-auto-columns: 1fr;
+  grid-auto-flow: column;
+  height: 46px;
+  margin-top: 1px;
+  padding: 5px 6px;
+}
+
+.rain-bars__bar {
+  display: block;
+  align-self: end;
+  min-height: 2px;
+  background: var(--meteo-border-faint);
+  border-radius: 1px 1px 0 0;
+
+  &.is-wet {
+    background: linear-gradient(180deg, var(--brand-azure), color-mix(in srgb, var(--brand-azure) 70%, var(--brand-ink)));
+    border-radius: 2px 2px 0 0;
+  }
+}
+
+
 .sun {
   align-items: center;
   display: grid;

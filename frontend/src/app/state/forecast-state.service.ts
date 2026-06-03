@@ -43,6 +43,7 @@ export class ForecastStateService {
       temperature: hourly.temperature_2m[index],
       apparentTemperature: hourly.apparent_temperature?.[index] ?? null,
       humidity: hourly.relative_humidity_2m?.[index] ?? null,
+      precipitation: hourly.precipitation?.[index] ?? null,
       precipitationProbability: hourly.precipitation_probability[index],
       windSpeed: hourly.wind_speed_10m[index],
       windDirection: hourly.wind_direction_10m?.[index] ?? null,

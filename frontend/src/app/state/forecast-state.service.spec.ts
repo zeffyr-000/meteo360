@@ -128,4 +128,25 @@ describe('ForecastStateService', () => {
         state.loadForecast(place);
         expect(state.errorKey()).toBe('weather.forecast_unavailable');
     });
+
+    it('maps hourly precipitation (mm) into HourlyPreview when the series is present', () => {
+        const forecast = buildForecast('2026-05-15T12:00', ['2026-05-15T12:00', '2026-05-15T13:00']);
+        forecast.hourly!.precipitation = [1.5, 0.0];
+        weatherServiceMock.getForecast.mockReturnValue(of(forecast));
+        const state = TestBed.inject(ForecastStateService);
+        state.loadForecast(place);
+        const hourly = state.hourlyPreview();
+        expect(hourly[0].precipitation).toBe(1.5);
+        expect(hourly[1].precipitation).toBe(0.0);
+    });
+
+    it('sets HourlyPreview.precipitation to null when the series is absent', () => {
+        const forecast = buildForecast('2026-05-15T12:00', ['2026-05-15T12:00']);
+        // No precipitation array on hourly payload (optional field omitted)
+        delete (forecast.hourly as any).precipitation;
+        weatherServiceMock.getForecast.mockReturnValue(of(forecast));
+        const state = TestBed.inject(ForecastStateService);
+        state.loadForecast(place);
+        expect(state.hourlyPreview()[0].precipitation).toBeNull();
+    });
 });

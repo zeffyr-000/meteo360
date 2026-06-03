@@ -33,6 +33,7 @@ export interface WeatherHourly {
     temperature_2m: number[];
     apparent_temperature?: number[];
     relative_humidity_2m?: number[];
+    precipitation?: number[];
     precipitation_probability: number[];
     weather_code: number[];
     wind_speed_10m: number[];
@@ -78,6 +79,7 @@ export interface HourlyPreview {
     temperature: number;
     apparentTemperature: number | null;
     humidity: number | null;
+    precipitation: number | null;
     precipitationProbability: number;
     windSpeed: number;
     windDirection: number | null;
