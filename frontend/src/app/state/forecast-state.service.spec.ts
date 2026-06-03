@@ -142,8 +142,8 @@ describe('ForecastStateService', () => {
 
     it('sets HourlyPreview.precipitation to null when the series is absent', () => {
         const forecast = buildForecast('2026-05-15T12:00', ['2026-05-15T12:00']);
-        // No precipitation array on hourly payload (optional field omitted)
-        delete (forecast.hourly as any).precipitation;
+        // precipitation is optional — leave it undefined to simulate the absent series
+        forecast.hourly!.precipitation = undefined;
         weatherServiceMock.getForecast.mockReturnValue(of(forecast));
         const state = TestBed.inject(ForecastStateService);
         state.loadForecast(place);
